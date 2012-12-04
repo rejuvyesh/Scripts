@@ -9,7 +9,7 @@ HOSTNAME=$(hostname)
 # dzen values
 FG="#ffffff" # dzen foreground
 BG="#000000" # dzen background
-FN="xft:consola:size=8" # font
+FN="-xos4-terminus-medium-*-*-*-12-*-*-*-*-*-*-*" # font
 
 E="sigusr1=raise;sigusr2=lower"
 H="13"
