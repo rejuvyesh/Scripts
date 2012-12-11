@@ -1,0 +1,3 @@
+#!/bin/zsh
+
+urxvtc -e start_irssi.sh
