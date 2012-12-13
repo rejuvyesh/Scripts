@@ -2,6 +2,8 @@
 # Copyright muflax <mail@muflax.com>, 2009
 # License: GNU GPL 3 <http://www.gnu.org/copyleft/gpl.html>
 
+# little modification by rejuvyesh
+
 # initalizes dzen bars
 
 HOSTNAME=$(hostname)
