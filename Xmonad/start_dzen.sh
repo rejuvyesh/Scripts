@@ -9,7 +9,7 @@
 HOSTNAME=$(hostname)
 
 # dzen values
-FG="#ffffff" # dzen foreground
+FG='#aaaaaa' # dzen foreground
 BG="#000000" # dzen background
 FN="-xos4-terminus-medium-*-*-*-12-*-*-*-*-*-*-*" # font
 
@@ -21,8 +21,8 @@ HEIGHT="768"
 
 
 DZEN="dzen2 -p -fg '$FG' -bg '$BG' -fn '$FN' -e '$E' -h '$H' -y '$(($HEIGHT - $H))'"
-DZEN_LEFT="$DZEN -x '0' -w '$(($WIDTH / 3))' -ta 'l'"
-DZEN_RIGHT="$DZEN -x '$(( $WIDTH / 3))' -w '$(( ($WIDTH / 3) * 2))' -ta 'r'"
+DZEN_LEFT="$DZEN -x '0' -w '566' -ta 'l'"
+DZEN_RIGHT="$DZEN -w '800' -x '$(( $WIDTH - 800 ))' -ta 'r'"
 
 # make 2 pipes - one for xmonad's output and one for the status bar
 XPIPE=~/.xmonad/xmonad-pipe
@@ -39,7 +39,6 @@ rm -f $pipe
   fi
 done
 
-# kill all old dzens
 killall -q dzen2
 
 # launch xmonad's dzen
