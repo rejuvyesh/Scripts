@@ -6,8 +6,8 @@
 # CPU Frequency widget requires cpufrequtils and bc
 
 # dzen2 options
-FG='#aaaaaa'
-BG='#1a1a1a'
+FG='#8a8a8a'
+BG='#000000'
 SCREEN_WIDTH=1366
 BAR_WIDTH=600
 HEIGHT=768
@@ -79,7 +79,7 @@ update_wired () {
         tx_rate=$(((n_txb - txb) / 1024))
         rxb=$n_rxb
         txb=$n_txb
-		    update_bar $1 "$ICON_WIRED" "$ICON_UP $tx_rate $ICON_DOWN $rx_rate "
+		    update_bar $1 "^ca(1, net.sh eth0)${ICON_WIRED}^ca()" "$ICON_UP $tx_rate $ICON_DOWN $rx_rate "
 		    sleep 2
 	  done
 }
@@ -93,7 +93,7 @@ update_wireless () {
         tx_rate=$(((n_txb - txb) / 1024))
         rxb=$n_rxb
         txb=$n_txb
-		    update_bar $1 "$ICON_WIRELESS" "$(iwconfig wlan0 | awk '/Quality/{print $2}' | cut -d'=' -f2 | awk -F'/' '{printf("%.0f%%", $1/$2*100)}') $ICON_UP $tx_rate $ICON_DOWN $rx_rate"
+		    update_bar $1 "^ca(1, net.sh wlan0)${ICON_WIRELESS}^ca()" "$(iwconfig wlan0 | awk '/Quality/{print $2}' | cut -d'=' -f2 | awk -F'/' '{printf("%.0f%%", $1/$2*100)}') $ICON_UP $tx_rate $ICON_DOWN $rx_rate"
 		    sleep 2
 	  done
 }
@@ -120,7 +120,7 @@ update_volume() {
         V="$(amixer get Master | grep -oP '\d+%' | tail -1)"
 		# clickable areas for muting, increasing, and decreasing volume
 		    vol_icon="^ca(1, amixer set Master toggle)^ca(4, amixer set Master 5+ unmute)^ca(5, amixer set Master 5-)$vol_icon $V"
-		    vol="$(echo $vol | sed -r 's/.*[0-9] \[([0-9]+)%.*/\1/' | gdbar -h 10 -w 30 -fg '#008080' -bg '#565656')^ca()^ca()^ca()"
+		    vol="$(echo $vol | sed -r 's/.*[0-9] \[([0-9]+)%.*/\1/' | gdbar -h 10 -w 30 -fg '#2c82dd' -bg '#565656')^ca()^ca()^ca()"
 
 		    update_bar $1 "$vol_icon" "$vol"
 		    inotifywait -t 30 -qq /dev/snd/controlC0
