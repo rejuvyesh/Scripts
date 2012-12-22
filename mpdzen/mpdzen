@@ -3,14 +3,14 @@
 RESPATH=( $0(:A:h) )
 
 FN_ARTIST='-*-*-*-*-*-*-18-*-*-*-*-*-*-*'
-CL_ARTIST='#5A863A'
+CL_ARTIST='#2c82dd'
 FN_SONG='-*-*-*-*-*-*-14-*-*-*-*-*-*-*'
 CL_SONG='#BDBABD'
 FN_ALBUM='-*-*-*-*-*-*-10-*-*-*-*-*-*-*'
 CL_ALBUM='#BDBABD'
 
 FN_TIME='-*-*-*-*-*-*-8-*-*-*-*-*-*-*'
-CL_TIME='#425142'
+CL_TIME='#398ee7'
 
 FN_INFO='-*-*-*-*-*-*-8-*-*-*-*-*-*-*'
 CL_INFO=''
@@ -53,7 +53,7 @@ img=( ~/.covers/(#ia3)${~ARTIST}/${~${(q)ALBUM}:gs/\//_}.xpm(N) )
                     img=${${img[1]}:gs/)/\\)}
         img="^i($img)"
         else
-        img="^fg(#324132)^r(64x64)^pa(36;28)^fg(#000000)?"
+        img="^fg(#76b1ee)^r(64x64)^pa(36;28)^fg(#000000)?"
         fi
 
         case $MPDSTATE in
@@ -70,7 +70,7 @@ img=( ~/.covers/(#ia3)${~ARTIST}/${~${(q)ALBUM}:gs/\//_}.xpm(N) )
                 "^pa(80;8)$STATE" \
                 "^pa(98;4)^fg($CL_ARTIST)^fn($FN_ARTIST)$ARTIST" \
                 "^pa(80;28)^fg($CL_SONG)^fn($FN_SONG)$SONG" \
-                "^pa(80;49)^fg(#324132)^r(200x6)^pa(80;49)^fg($CL_TIME)^r($(($PERCENT*2))x6)" \
+                "^pa(80;49)^fg(#76b1ee)^r(200x6)^pa(80;49)^fg($CL_TIME)^r($(($PERCENT*2))x6)" \
                 "^pa(300;48)^fg($CL_TIME)^fn($FN_TIME)$TIME_NOW / $TIME_TOTAL" \
                 "^pa(365;54)^fg($CL_INFO)^fn($FN_INFO)$PL_NOW / $PL_TOTAL" \
                 "^pa(80;58)^fg($CL_INFO)^fn($FN_INFO)$STATUS" | $dzen -p 3 -h 72 -x $[ 1275-$W ] -y 20 -w $W -ta l
@@ -81,7 +81,7 @@ img=( ~/.covers/(#ia3)${~ARTIST}/${~${(q)ALBUM}:gs/\//_}.xpm(N) )
                 "^pa(98;4)^fg($CL_ARTIST)^fn($FN_ARTIST)$ARTIST" \
                 "^pa($(($W-30));14)^fg($CL_INFO)^fn($FN_INFO)$PL_NOW / $PL_TOTAL" \
                 "^pa(80;28)^fg($CL_SONG)^fn($FN_SONG)$SONG" \
-                "^pa(80;49)^fg(#324132)^r(200x6)^pa(80;49)^fg($CL_TIME)^r($(($PERCENT*2))x6)" \
+                "^pa(80;49)^fg(#76b1ee)^r(200x6)^pa(80;49)^fg($CL_TIME)^r($(($PERCENT*2))x6)" \
                 "^pa(300;48)^fg($CL_TIME)^fn($FN_TIME)$TIME_NOW / $TIME_TOTAL" \
                 "^pa(80;58)^fg($CL_INFO)^fn($FN_INFO)$STATUS" | $dzen -p 3 -h 72 -x $[ 1275-$W ] -y 20 -w $W -ta l
         fi
