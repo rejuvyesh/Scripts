@@ -120,7 +120,7 @@ update_volume() {
         V="$(amixer get Master | grep -oP '\d+%' | tail -1)"
 		# clickable areas for muting, increasing, and decreasing volume
 		    vol_icon="^ca(1, amixer set Master toggle)^ca(4, amixer set Master 5+ unmute)^ca(5, amixer set Master 5-)$vol_icon $V"
-		    vol="$(echo $vol | sed -r 's/.*[0-9] \[([0-9]+)%.*/\1/' | gdbar -h 10 -w 30 -fg '#2c82dd' -bg '#565656')^ca()^ca()^ca()"
+		    vol="$(echo $vol | sed -r 's/.*[0-9] \[([0-9]+)%.*/\1/' | gdbar -h 10 -w 30 -fg '#61a0b9' -bg '#565656')^ca()^ca()^ca()"
 
 		    update_bar $1 "$vol_icon" "$vol"
 		    inotifywait -t 30 -qq /dev/snd/controlC0
