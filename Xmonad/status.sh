@@ -94,7 +94,7 @@ update_wireless () {
         rxb=$n_rxb
         txb=$n_txb
 		    update_bar $1 "^ca(1, net.sh wlan0)${ICON_WIRELESS}^ca()" "$(iwconfig wlan0 | awk '/Quality/{print $2}' | cut -d'=' -f2 | awk -F'/' '{printf("%.0f%%", $1/$2*100)}') $ICON_UP $tx_rate $ICON_DOWN $rx_rate"
-		    sleep 2
+	      sleep 2
 	  done
 }
 
@@ -102,9 +102,12 @@ update_network(){
     local net="$(ip link show wlan0 | grep 'state UP')"
     if [[ -z $net ]]; then
         update_wired 3 &
+        sleep 2
     else
         update_wireless 3 &
+        sleep 2
     fi
+
 }
 
 update_volume() {
