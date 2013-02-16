@@ -8,7 +8,7 @@ if [ $? -eq 0 ]; then
 fi
 
 tmux  new-session -d -s $SESSION 'ncmpcpp -s playlist'
-tmux  split-window -d -t $SESSION:1 -p 45 'ncmpcpp -s visualizer'
+tmux  split-window -d -t $SESSION:1 -p 55 'ncmpcpp -s visualizer'
 tmux  select-pane -t $SESSION:1.1
 tmux  split-window -d -t $SESSION:1 -h -p 50 'ncmpcpp'
 tmux  select-pane -t $SESSION:1.0
