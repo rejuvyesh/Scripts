@@ -16,7 +16,7 @@ echo "Fetching Artist $1, Album $2..."
 # simple http get request for album.getinfo, with artist + album
 data=$(curl \
     --data-urlencode method=album.getinfo \
-    --data-urlencode api_key=2f63459bcb2578a277c5cf5ec4ca62f7 \
+    --data-urlencode api_key=72935509b97cbe4f42bd3d9d1573fbdc \
     --data-urlencode artist=$1 \
     --data-urlencode album=$2 \
     -G -s http://ws.audioscrobbler.com/2.0/)
