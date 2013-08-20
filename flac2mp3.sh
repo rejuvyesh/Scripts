@@ -1,7 +1,7 @@
 #! /bin/sh
 
 for a in *.flac; do
-    Outf=${a%.flac}.mp3
+    OUTF=${a%.flac}.mp3
 
     ARTIST=`metaflac "$a" --show-tag=ARTIST | sed s/.*=//g`
     TITLE=`metaflac "$a" --show-tag=TITLE | sed s/.*=//g`
