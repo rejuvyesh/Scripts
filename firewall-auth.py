@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 
 # Copyright (c) 2009 Siddharth Agarwal
 #
@@ -24,9 +24,9 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 
 import getpass
-import http.client
-import urllib.request, urllib.parse, urllib.error
-import urllib.parse
+import httplib
+import urllib
+import urlparse
 import re
 from optparse import OptionParser
 import sys
@@ -37,7 +37,7 @@ import socket
 import gc
 
 class FirewallState:
-  Start, LoggedIn, End = list(range(3))
+  Start, LoggedIn, End = range(3)
 
 # Globals, set right in the beginning
 username = None
@@ -55,7 +55,7 @@ def start_func():
 
   try:
     loginstate, data = login()
-  except (http.client.HTTPException, socket.error) as e:
+  except (httplib.HTTPException, socket.error) as e:
     logger.info("Exception |%s| while trying to log in. Retrying in %d seconds." %
                 (e, ERROR_RETRY_SECS))
     return (FirewallState.Start, ERROR_RETRY_SECS, None)
@@ -83,11 +83,11 @@ def logged_in_func(keepaliveurl):
   LOGGED_IN_SECS = 200
   try:
     keep_alive(keepaliveurl)
-  except http.client.BadStatusLine:
+  except httplib.BadStatusLine:
     logger.info("The keepalive URL %s doesn't work. Attempting to log in again." %
                 keepaliveurl.geturl())
     return (FirewallState.Start, 0, None)
-  except (http.client.HTTPException, socket.error) as e:
+  except (httplib.HTTPException, socket.error) as e:
     logger.info("Exception |%s| while trying to keep alive. Retrying in %d seconds." %
                 (e, ERROR_RETRY_SECS))
     return (FirewallState.LoggedIn, ERROR_RETRY_SECS, [keepaliveurl])
@@ -116,15 +116,15 @@ def run_state_machine():
     logger = logging.getLogger("FirewallLogger")
     if state == FirewallState.LoggedIn:
       url = args[0]
-      logouturl = urllib.parse.ParseResult(url.scheme, url.netloc, "/logout",
+      logouturl = urlparse.ParseResult(url.scheme, url.netloc, "/logout",
                                        url.params, url.query, url.fragment)
       try:
         logger.info("Logging out with URL %s" % logouturl.geturl())
-        conn = http.client.HTTPSConnection(logouturl.netloc)
+        conn = httplib.HTTPSConnection(logouturl.netloc)
         conn.request("GET", logouturl.path + "?" + logouturl.query)
         response = conn.getresponse()
         response.read()
-      except (http.client.HTTPException, socket.error) as e:
+      except (httplib.HTTPException, socket.error) as e:
         # Just print an error message
         logger.info("Exception |%s| while logging out." % e)
       finally:
@@ -142,7 +142,7 @@ def run_state_machine():
       time.sleep(sleeptime)
 
 class LoginState:
-  AlreadyLoggedIn, InvalidCredentials, Successful = list(range(3))
+  AlreadyLoggedIn, InvalidCredentials, Successful = range(3)
 
 def login():
   """
@@ -154,7 +154,7 @@ def login():
   logger = logging.getLogger("FirewallLogger")
   # Find out where to auth
   try:
-    conn = http.client.HTTPConnection("74.125.236.51:80")
+    conn = httplib.HTTPConnection("74.125.236.51:80")
     conn.request("GET", "/")
     response = conn.getresponse()
     # 303 leads to the auth page, so it means we're not logged in
@@ -168,9 +168,9 @@ def login():
   logger.info("The auth location is: %s" % authlocation)
 
   # Make a connection to the auth location
-  parsedauthloc = urllib.parse.urlparse(authlocation)
+  parsedauthloc = urlparse.urlparse(authlocation)
   try:
-    authconn = http.client.HTTPSConnection(parsedauthloc.netloc)
+    authconn = httplib.HTTPSConnection(parsedauthloc.netloc)
     authconn.request("GET", parsedauthloc.path + "?" + parsedauthloc.query)
     authResponse = authconn.getresponse()
     data = authResponse.read()
@@ -183,13 +183,13 @@ def login():
   logger.debug("The magic string is: " + magicString)
 
   # Now construct a POST request
-  params = urllib.parse.urlencode({'username': username, 'password': password,
+  params = urllib.urlencode({'username': username, 'password': password,
                              'magic': magicString, '4Tredir': '/'})
   headers = {"Content-Type": "application/x-www-form-urlencoded",
              "Accept": "text/plain"}
 
   try:
-    postconn = http.client.HTTPSConnection(parsedauthloc.netloc)
+    postconn = httplib.HTTPSConnection(parsedauthloc.netloc)
     postconn.request("POST", "/", params, headers)
 
     # Get the response
@@ -209,7 +209,7 @@ def login():
 
   logger.info("The keep alive URL is: " + keepaliveURL)
   logger.debug(postData)
-  return (LoginState.Successful, urllib.parse.urlparse(keepaliveURL))
+  return (LoginState.Successful, urlparse.urlparse(keepaliveURL))
 
 def keep_alive(url):
   """
@@ -219,7 +219,7 @@ def keep_alive(url):
   logger.info("Sending request to keep alive.")
   # Connect to the firewall
   try:
-    conn = http.client.HTTPSConnection(url.netloc)
+    conn = httplib.HTTPSConnection(url.netloc)
     conn.request("GET", url.path + "?" + url.query)
     # This line raises an exception if the URL stops working. We catch it in
     # logged_in_func.
@@ -238,7 +238,7 @@ def get_credentials(args):
   username = None
   if len(args) == 0:
     # Get the username from the input
-    print("Username: ", end=' ')
+    print "Username: ",
     username = sys.stdin.readline()[:-1]
   else:
     # First member of args
