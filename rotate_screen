@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+# -*- encoding: utf-8 -*-
+# Usage: rote_screen <arg>
+# Here <arg> = left | right | normal | inverted
+
+direction = ARGV.shift || "normal"
+
+possible_directions = %w{left right normal inverted}
+
+if possible_directions.include? direction
+screen = `xrandr -q`[/([\w-]+) connected/, 1]
+system "xrandr --output #{screen} --rotate #{direction}"
+else
+puts "acceptable rotation targets: #{possible_directions.join ", "}"
+exit 1
+end
