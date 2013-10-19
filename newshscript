@@ -1,0 +1,10 @@
+#!/bin/zsh
+
+if [[ -e "$1" ]]
+then
+    echo "$1 already exists"
+    exit
+fi
+echo -e "#!/bin/zsh\n\n" > "$1"
+chmod a+x "$1"
+emacsclient "-nw" "$1"
