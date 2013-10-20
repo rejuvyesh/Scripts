@@ -1,0 +1,6 @@
+#!/usr/bin/env Rscript --no-init-file
+
+#Parse a file and print the first error encountered.
+args <- commandArgs(trailingOnly=TRUE)
+filename = args[[1]]
+tryCatch(invisible(do.call("parse", list(filename))), error=print)
