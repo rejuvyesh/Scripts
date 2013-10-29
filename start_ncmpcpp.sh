@@ -32,6 +32,6 @@ for i in "\\"
 do tmux send-keys -t $SESSION:1.1 "$i"
 done
 
-tmux set -t $SESSION -g status off
+#tmux set -t $SESSION -g status off
 
 tmux attach-session -t $SESSION
