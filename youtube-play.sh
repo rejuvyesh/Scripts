@@ -21,7 +21,7 @@ video_url="$(youtube-dl \
 "$1")"
 
 mpv \
---autofit=100x100
+--autofit=100x100 \
 --cookies \
 --cookies-file="$cookies_file" \
 --user-agent="$user_agent" \
