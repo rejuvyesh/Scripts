@@ -14,7 +14,7 @@ rm -rf "$cookies_dir"
 mkdir "$cookies_dir" || exit 1
 chmod 0700 "$cookies_dir" || exit 1
 
-video_url="$(youtube-dl \
+video_url="$(youtube-dl --quiet\
 --user-agent="$user_agent" \
 --cookies="$cookies_file" \
 --get-url \
