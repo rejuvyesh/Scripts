@@ -20,8 +20,11 @@ video_url="$(youtube-dl \
 --get-url \
 "$1")"
 
+# Start in the bottom right corner
 mpv \
---autofit="100x100" \
+--quiet \
+--geometry="100%:97%" \
+--autofit="150x150" \
 --cookies \
 --cookies-file="$cookies_file" \
 --user-agent="$user_agent" \
