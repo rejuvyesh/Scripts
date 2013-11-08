@@ -2,6 +2,6 @@
 # Copyright muflax <muflax@gmail.com>, 2009
 # License: GNU GPL 3 <http://www.gnu.org/copyleft/gpl.html>
 
-TARGET="$HOME/pigs/selection/selection-$(date "+%F[%H:%M:%S]").png"
+TARGET="$HOME/images/selection/selection-$(date "+%F[%H:%M:%S]").png"
 DISPLAY=:0.0 import +repage -quality 100 -silent png:$TARGET
 echo $TARGET
