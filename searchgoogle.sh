@@ -3,8 +3,8 @@
 term=$@
 foo=''
 #search with surfraw
-sr google $term
-#wait until the window exists and registers with the WM
+sr google $term >& /dev/null
+## wait until the window exists and registers with the WM
 while [ -z "$foo" ]; do
     foo=$(wmctrl -l |grep -i "$term - Google Search")
     sleep .5
