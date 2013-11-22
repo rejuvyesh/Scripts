@@ -1,3 +1,1 @@
-#!/bin/zsh
-# emacsclient -c -n --alternate-editor='' $@
-emacs $* &!
+emacs
