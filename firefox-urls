@@ -1,0 +1,14 @@
+#!/bin/zsh
+
+# Created by rejuvyesh <rejuvyesh@gmail.com>
+
+limit="10 days"
+
+places=$(find ~/.mozilla/ -name "places.sqlite" | head -1)
+
+sql="SELECT url FROM moz_places, moz_historyvisits \
+WHERE moz_places.id = moz_historyvisits.place_id \
+and visit_date > strftime('%s','now','-$limit')*1000000 \
+ORDER by visit_date;"
+
+sqlite3 $places $sql | filter-urls
