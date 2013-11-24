@@ -9,7 +9,6 @@
 
 require "cri"
 require "mechanize"
-require "nokogiri"
 
 command = Cri::Command.define do
   name        'grab-goodreads-csv'
