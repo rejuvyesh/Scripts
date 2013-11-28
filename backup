@@ -4,7 +4,8 @@
 
 source ~/.zshrc
 
-BACKUP_DIR="/media/rejuvyesh-disk/backup"
+MOUNTED_DRIVE="/media/rejuvyesh-disk"
+BACKUP_DIR="$MOUNTED_DRIVE/backup"
 DATE_FORMAT="+%Y-%m-%d"
 
 function is_locked() {
@@ -28,20 +29,20 @@ fi
 rm -f /tmp/rbs.lock
 echo $$ > /tmp/rbs.lock
 
-echo "update local bup index..."
-cd $HOME # do it here so that the bupignore paths work without rewriting
-ionice -c3 bup -d $BACKUP_DIR index -u $HOME --xdev --exclude-from $HOME/.bupignore
+if mountpoint -q $MOUNTED_DRIVE; then # check for mounted drive
+    echo "update local bup index..."
+    cd $HOME # do it here so that the bupignore paths work without rewriting
+    ionice -c3 bup -d $BACKUP_DIR index -u $HOME --xdev --exclude-from $HOME/.bupignore
 
-# start backup
-echo "copy bup packs..."
-branch="$(hostname)-$(date $DATE_FORMAT)"
-ionice -c3 bup -d $BACKUP_DIR save -n $branch $HOME
-#ionice -c3 /usr/bin/mv $HOME/.bup/* $BACKUP_DIR/
+    # start backup
+    echo "copy bup packs..."
+    branch="$(hostname)-$(date $DATE_FORMAT)"
+    ionice -c3 bup -d $BACKUP_DIR save -n $branch $HOME
 
-echo "verify bup packs..."
-cd $BACKUP_DIR/
-ionice -c3 bup -d . fsck -g -vv
-
+    echo "verify bup packs..."
+    cd $BACKUP_DIR/
+    ionice -c3 bup -d . fsck -g -vv
+fi
 
 # remove lockfile
 rm -f /tmp/rbs.lock
