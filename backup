@@ -30,13 +30,13 @@ echo $$ > /tmp/rbs.lock
 
 echo "update local bup index..."
 cd $HOME # do it here so that the bupignore paths work without rewriting
-ionice -c3 bup index -u $HOME --xdev --exclude-from $HOME/.bupignore
+ionice -c3 bup -d $BACKUP_DIR index -u $HOME --xdev --exclude-from $HOME/.bupignore
 
 # start backup
 echo "copy bup packs..."
 branch="$(hostname)-$(date $DATE_FORMAT)"
-ionice -c3 bup save -n $branch $HOME
-ionice -c3 /usr/bin/mv $HOME/.bup/* $BACKUP_DIR/
+ionice -c3 bup -d $BACKUP_DIR save -n $branch $HOME
+#ionice -c3 /usr/bin/mv $HOME/.bup/* $BACKUP_DIR/
 
 echo "verify bup packs..."
 cd $BACKUP_DIR/
