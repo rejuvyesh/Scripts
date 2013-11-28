@@ -1,0 +1,47 @@
+#!/bin/zsh
+
+# Created by rejuvyesh <rejuvyesh@gmail.com>
+
+source ~/.zshrc
+
+BACKUP_DIR="/media/rejuvyesh-disk/backup"
+DATE_FORMAT="+%Y-%m-%d"
+
+function is_locked() {
+    # check for lockfile
+    if [[ -f /tmp/rbs.lock ]]; then
+        # process already running?
+        if [[ "$(ps -p $(cat /tmp/rbs.lock) | wc -l)" -gt 1 ]]; then
+            echo "locked"
+            return
+        fi
+    fi
+    echo "unlocked"
+}
+
+if [[ $(is_locked) == "locked" ]]; then
+    echo "process already running, aborting..."
+    exit 1
+fi
+
+# create lockfile
+rm -f /tmp/rbs.lock
+echo $$ > /tmp/rbs.lock
+
+echo "update local bup index..."
+cd $HOME # do it here so that the bupignore paths work without rewriting
+ionice -c3 bup index -u $HOME --xdev --exclude-from $HOME/.bupignore
+
+# start backup
+echo "copy bup packs..."
+branch="$(hostname)-$(date $DATE_FORMAT)"
+ionice -c3 bup save -n $branch $HOME
+ionice -c3 /usr/bin/mv $HOME/.bup/* $BACKUP_DIR/
+
+echo "verify bup packs..."
+cd $BACKUP_DIR/
+ionice -c3 bup -d . fsck -g -vv
+
+
+# remove lockfile
+rm -f /tmp/rbs.lock
