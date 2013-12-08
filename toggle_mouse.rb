@@ -6,6 +6,7 @@
 devices = [
            "bcm5974",
            "Synaptics TouchPad",
+           "USB Optical Mouse"
           ]
 
 id = nil
