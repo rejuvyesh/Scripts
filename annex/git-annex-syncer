@@ -1,0 +1,11 @@
+#!/bin/zsh
+
+# Created by rejuvyesh <rejuvyesh@gmail.com>
+
+# sync all git-annex repos
+for dir in $(cat ~/.git-annex-dirs); do
+    echo $dir...
+    cd $HOME/$dir
+    git-annex add
+    git-annex sync
+done

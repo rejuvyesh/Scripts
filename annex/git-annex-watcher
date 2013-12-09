@@ -1,0 +1,9 @@
+#!/bin/zsh
+
+# Created by rejuvyesh <rejuvyesh@gmail.com>
+
+for dir in $(cat ~/.git-annex-dirs); do
+    echo $dir...
+    cd $HOME/$dir
+    git-annex watch || true
+done

@@ -1,0 +1,19 @@
+#!/bin/zsh
+
+# Created by rejuvyesh <rejuvyesh@gmail.com>
+
+# avoid running git annex get unnecessarily
+
+if [[ -d '.git/annex/' ]]; then
+    oldHead=`git rev-parse HEAD`
+    git annex sync;
+    newHead=`git rev-parse HEAD`
+    if [ "$oldHead" != "$newHead" ]; then
+        git annex get . --quiet
+        git annex sync
+    else
+        echo "No Change to Get..."
+    fi
+else
+    git pull origin master
+fi

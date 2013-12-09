@@ -1,0 +1,11 @@
+#!/bin/zsh
+
+# Created by rejuvyesh <rejuvyesh@gmail.com>
+
+# grab all preferred data
+for dir in $(cat ~/.git-annex-dirs); do
+    echo $dir...
+    cd $HOME/$dir
+    git fsck && git gc && git prune && \
+        git-annex unused && git-annex dropunused 1-10000 --force
+done
