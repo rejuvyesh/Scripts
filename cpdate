@@ -1,0 +1,8 @@
+#!/bin/sh
+# Copy a file with a timestamp appended
+# Created by rejuvyesh <rejuvyesh@gmail.com>
+
+bname=`echo $1 | cut -d'.' -f1`
+ext=`echo $1 | cut -d'.' -f2-`
+dts=`date +%Y%m%d-%H%M%S`
+cp $1 $bname.$dts.$ext
