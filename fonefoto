@@ -1,0 +1,57 @@
+#!/bin/zsh
+
+# Created by rejuvyesh <rejuvyesh@gmail.com>
+
+phone_type=android
+
+if [["$1" = cleanup]]; then
+    echo "Removing downloaded photos from phone..."
+
+    case $phone_type in
+        android)
+            rm -f '~/android/SD CARD/DCIM/*/*' || true
+            sleep 1
+            ;;
+    esac
+    exit 0
+fi
+if [["$1" = setup]]; then
+    printf "Waiting for phone..."
+    case $phone_type in
+        android)
+            go-mtpfs ~/android
+            echo
+            ;;
+    esac
+    exit 0
+fi
+
+if [["$1" = unmount]]; then
+    printf "unmounting phone..."
+    case $phone_type in
+        android)
+            fusermount -u ~/android
+            echo done
+            ;;
+    esac
+fi            
+cd ~/images/camera/
+subdir="$(date +%F_%H:%M)"
+mkdir -p "$subdir"
+rm -f latest
+ln -sf "$subdir" latest
+
+case "$phone_type" in
+    android)
+        fonefoto setup
+        cp -v '~/android/SD CARD/DCIM/*/*'
+        fonefoto cleanup
+        ;;
+    *)
+        echo "bad phone type $phone_type" >&2
+        exit 1
+esac
+
+rmdir * 2>/dev/null || true # weed empty dirs
+git annex add .
+git commit -m "add $subdir"
