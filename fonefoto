@@ -4,18 +4,18 @@
 
 phone_type=android
 
-if [["$1" = cleanup]]; then
+if [[ "$1" = cleanup ]]; then
     echo "Removing downloaded photos from phone..."
 
     case $phone_type in
         android)
-            rm -f '~/android/SD CARD/DCIM/*/*' || true
+            rm -f ~/android/SD\ card/DCIM/*/* || true
             sleep 1
             ;;
     esac
     exit 0
 fi
-if [["$1" = setup]]; then
+if [[ "$1" = setup ]]; then
     printf "Waiting for phone..."
     case $phone_type in
         android)
@@ -26,7 +26,7 @@ if [["$1" = setup]]; then
     exit 0
 fi
 
-if [["$1" = unmount]]; then
+if [[ "$1" = unmount ]]; then
     printf "unmounting phone..."
     case $phone_type in
         android)
@@ -43,8 +43,8 @@ ln -sf "$subdir" latest
 
 case "$phone_type" in
     android)
-        fonefoto setup
-        cp -v '~/android/SD CARD/DCIM/*/*'
+        #fonefoto setup
+        cp -v ~/android/SD\ card/DCIM/*/* "./$subdir/"
         fonefoto cleanup
         ;;
     *)
