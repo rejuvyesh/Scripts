@@ -34,24 +34,25 @@ if [[ "$1" = unmount ]]; then
             echo done
             ;;
     esac
-fi            
-cd ~/images/camera/
-subdir="$(date +%F_%H:%M)"
-mkdir -p "$subdir"
-rm -f latest
-ln -sf "$subdir" latest
+fi
+if [[ "$1" = mv ]]; then
+    cd ~/images/camera/
+    subdir="$(date +%F_%H:%M)"
+    mkdir -p "$subdir"
+    rm -f latest
+    ln -sf "$subdir" latest
 
-case "$phone_type" in
-    android)
-        #fonefoto setup
-        cp -v ~/android/SD\ card/DCIM/*/* "./$subdir/"
-        fonefoto cleanup
-        ;;
-    *)
-        echo "bad phone type $phone_type" >&2
-        exit 1
-esac
+    case "$phone_type" in
+        android)
+            cp -v ~/android/SD\ card/DCIM/*/* "./$subdir/"
+            fonefoto cleanup
+            ;;
+        *)
+            echo "bad phone type $phone_type" >&2
+            exit 1
+    esac
 
-rmdir * 2>/dev/null || true # weed empty dirs
-git annex add .
-git commit -m "add $subdir"
+    rmdir * 2>/dev/null || true # weed empty dirs
+    git annex add .
+    git commit -m "add $subdir"
+fi
