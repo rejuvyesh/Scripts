@@ -59,9 +59,9 @@ rescue OptionParser::InvalidOption => e
 end
 
 if options[:position] == :top_left
-        cmd << "--geometry='0:17' --autofit='150x150'"
+        cmd << "--geometry='0:17' --autofit='200x200'"
 elsif options[:position] == :bottom_right
-        cmd << "--geometry='100%:97%' --autofit='150x150'"
+        cmd << "--geometry='100%:97%' --autofit='200x200'"
 end
 
 # audio filter
