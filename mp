@@ -62,7 +62,7 @@ end
 
 # speed increase
 if options[:speed] != 1.0
-        cmd << "--speed #{options[:speed]}"
+        cmd << "--speed=#{options[:speed]}"
 end
 
 # begin execution
