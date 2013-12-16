@@ -16,17 +16,18 @@ cmd = ["mpv"]
 pwd = Dir.pwd
 
 # check if there is a .mp file in the current directory and add it as options
+
 if File.exists? ".mp"
         File.open(".mp", "r").each do |line|
                 ARGV << line.chomp
         end
-end
+end 
 
 # parse options
 begin
         OptionParser.new do |opts|
                 opts.banner = "Usage: mp [options]"
-
+        
                 opts.on("-+", "--vol=VOL", Integer, "increase volume by VOL") do |v|
                         options[:volume] = v
                 end
@@ -42,8 +43,17 @@ begin
                 end
                 opts.on("-y", "--youtube", "youtube mode") do |y|
                         options[:speed] = 1.5
+                        cmd << "--cache-default=2048"
+                end
+                opts.on("-a", "--audio", "audio mode") do |a|
+                        
+                        # cmd << "--audio-display=no --gapless-audio"
+                end
+                opts.on("-s", "--save", "save position on quit") do |sa| 
+                        cmd << "--save-position-on-quit"
                 end
         end.parse!
+
 rescue OptionParser::InvalidOption => e
         cmd << e.to_s.sub(/^invalid option:\s+/, "")
 end
@@ -66,7 +76,6 @@ if options[:speed] != 1.0
 end
 
 # begin execution
-ENV["DISPLAY"] = display
 mpv = cmd.join(" ") + " " + Shellwords.shelljoin(ARGV)
 puts "running '#{mpv}'..."
 system mpv
