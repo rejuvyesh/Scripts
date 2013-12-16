@@ -55,10 +55,11 @@ elsif options[:position] == :bottom_right
 end
 
 # audio filter
-cmd << "--af=scaletempo"
+cmd << "--af=scaletempo"  # Remove chirping at higher speed
 if options[:volume].nonzero?
         cmd << "--af=volume=#{options[:volume]}"
 end
+
 # speed increase
 if options[:speed] != 1.0
         cmd << "--speed #{options[:speed]}"
