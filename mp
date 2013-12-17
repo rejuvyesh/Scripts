@@ -12,67 +12,71 @@ options = {
         speed: 1.0,
 }
 
-cmd = ["mpv"]
+cmd = ["mpv --save-position-on-quit"]
 pwd = Dir.pwd
 
 # check if there is a .mp file in the current directory and add it as options
 
 if File.exists? ".mp"
-        File.open(".mp", "r").each do |line|
-                ARGV << line.chomp
-        end
+  File.open(".mp", "r").each do |line|
+    ARGV << line.chomp
+  end
 end 
 
 # parse options
 begin
-        OptionParser.new do |opts|
-                opts.banner = "Usage: mp [options]"
-        
-                opts.on("-+", "--vol=VOL", Integer, "increase volume by VOL") do |v|
-                        options[:volume] = v
-                end
+  OptionParser.new do |opts|
+    opts.banner = "Usage: mp [options]"
+    
+    opts.on("-+", "--vol=VOL", Integer, "increase volume by VOL") do |v|
+      options[:volume] = v
+    end
 
-                opts.on("-t", "--top-left", "play in top-left corner of the screen") do |tl|
-                        options[:position] = :top_left
-                end
-                opts.on("-b", "--bottom-right", "play in bottom-right corner of the screen") do |br|
-                        options[:position] = :bottom_right
-                end
-                opts.on("-x", "--speed SPEED", Float, "increase speed by SPEED") do |s|
-                        options[:speed] = s
-                end
-                opts.on("-y", "--youtube", "youtube mode") do |y|
-                        options[:speed] = 1.5
-                        cmd << "--cache-default=2048"
-                end
-                opts.on("-a", "--audio", "audio mode") do |a|
-                        
-                        # cmd << "--audio-display=no --gapless-audio"
-                end
-                opts.on("-s", "--save", "save position on quit") do |sa| 
-                        cmd << "--save-position-on-quit"
-                end
-        end.parse!
+    opts.on("-t", "--top-left", "play in top-left corner of the screen") do |tl|
+      options[:position] = :top_left
+    end
+    opts.on("-b", "--bottom-right", "play in bottom-right corner of the screen") do |br|
+      options[:position] = :bottom_right
+    end
+    opts.on("-x", "--speed SPEED", Float, "increase speed by SPEED") do |x|
+      options[:speed] = x
+    end
+    opts.on("-s", "--size STR", "set size of the player") do |sa| 
+      options[:size] = sa
+    end
+    opts.on("-y", "--youtube", "youtube mode") do |y|
+      options[:speed] = 1.5
+      cmd << "--cache-default=2048"
+    end
+    opts.on("-a", "--audio", "audio mode") do |a|
+      cmd << "--audio-display=no --gapless-audio"
+    end
+  end.parse!
 
 rescue OptionParser::InvalidOption => e
-        cmd << e.to_s.sub(/^invalid option:\s+/, "")
+  cmd << e.to_s.sub(/^invalid option:\s+/, "")
+end
+
+# size
+if options[:size]
+  cmd << "--autofit='#{options[:size]}'"
 end
 
 if options[:position] == :top_left
-        cmd << "--geometry='0:17' --autofit='200x200'"
+  cmd << "--geometry='0:17'"
 elsif options[:position] == :bottom_right
-        cmd << "--geometry='100%:97%' --autofit='200x200'"
+  cmd << "--geometry='100%:97%'"
 end
 
 # audio filter
 cmd << "--af=scaletempo"  # Remove chirping at higher speed
 if options[:volume].nonzero?
-        cmd << "--af=volume=#{options[:volume]}"
+  cmd << "--af=volume=#{options[:volume]}"
 end
 
 # speed increase
 if options[:speed] != 1.0
-        cmd << "--speed=#{options[:speed]}"
+  cmd << "--speed=#{options[:speed]}"
 end
 
 # begin execution
