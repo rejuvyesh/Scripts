@@ -33,30 +33,30 @@ begin
     opts.banner = "Usage: mp [options]"
     
     opts.on("-+", "--vol=VOL", Integer, "increase volume by VOL") do |v|
-      options[:volume] = v
+      options[:volume]   = v
     end
 
-    opts.on("-l", "--top-left", "play in top-left corner of the screen") do |tl|
+    opts.on("-l", "--top-left",     "play in top-left corner of the screen") do |tl|
       options[:position] = :top_left
     end
     opts.on("-b", "--bottom-right", "play in bottom-right corner of the screen") do |br|
       options[:position] = :bottom_right
     end
-    opts.on("-x", "--speed SPEED", Float, "increase speed by SPEED") do |x|
-      options[:speed] = x
+    opts.on("-x", "--speed SPEED",  Float, "increase speed by SPEED") do |x|
+      options[:speed]    = x
     end
-    opts.on("-s", "--size STR", "set size of the player") do |sa| 
-      options[:size] = sa
+    opts.on("-s", "--size STR",     "set size of the player") do |sa| 
+      options[:size]     = sa
     end
-    opts.on("-y", "--youtube", "youtube mode") do |y|
-      options[:speed] = 1.5
+    opts.on("-y", "--youtube",      "youtube mode") do |y|
+      options[:speed]    = 1.5
       cmd << "--cache-default=2048"
     end
-    opts.on("-a", "--audio", "audio mode") do |a|
+    opts.on("-a", "--audio",        "audio mode") do |a|
       cmd << "--audio-display=no --gapless-audio"
     end
-    opts.on("-t", "--trakt", "scrobble to trakt") do |t| 
-      options[:trakt] = true;
+    opts.on("-t", "--trakt",        "scrobble to trakt") do |t| 
+      options[:trakt]    = true;
     end
   end.parse!
 
@@ -94,10 +94,10 @@ system mpv
 
 # mark as seen on trakt
 if options[:trakt]
-  traktconfig =  YAML.load File.open("#{Dir.home}/.traktrc")
-  @trakt = Traktr::Client.new(traktconfig["api_key"], traktconfig["username"], traktconfig["password"], true)
-  show      = ToName.to_name(file)
-  info      = @trakt.search.shows(show.name)
-  @episodes = @trakt.show.season(info[0].title, show.series)
-  res       = @trakt.show.episode.seen(info[0], @episodes[show.episode-1..show.episode-1])
+  traktconfig = YAML.load File.open("#{Dir.home}/.traktrc")
+  @trakt      = Traktr::Client.new(traktconfig["api_key"], traktconfig["username"], traktconfig["password"], true)
+  show        = ToName.to_name(file)
+  info        = @trakt.search.shows(show.name)
+  @episodes   = @trakt.show.season(info[0].title,       show.series)
+  res         = @trakt.show.episode.seen(info[0],       @episodes[show.episode-1..show.episode-1])
 end
