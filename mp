@@ -5,6 +5,10 @@
 
 require 'optparse'
 require 'shellwords'
+require 'traktr'
+require 'to_name'
+require 'yaml'
+
 
 # defaults
 options = {
@@ -32,7 +36,7 @@ begin
       options[:volume] = v
     end
 
-    opts.on("-t", "--top-left", "play in top-left corner of the screen") do |tl|
+    opts.on("-l", "--top-left", "play in top-left corner of the screen") do |tl|
       options[:position] = :top_left
     end
     opts.on("-b", "--bottom-right", "play in bottom-right corner of the screen") do |br|
@@ -50,6 +54,9 @@ begin
     end
     opts.on("-a", "--audio", "audio mode") do |a|
       cmd << "--audio-display=no --gapless-audio"
+    end
+    opts.on("-t", "--trakt", "scrobble to trakt") do |t| 
+      options[:trakt] = true;
     end
   end.parse!
 
@@ -80,6 +87,17 @@ if options[:speed] != 1.0
 end
 
 # begin execution
-mpv = cmd.join(" ") + " " + Shellwords.shelljoin(ARGV)
+file      = Shellwords.shelljoin(ARGV)
+mpv       = cmd.join(" ") + " " + file
 puts "running '#{mpv}'..."
 system mpv
+
+# mark as seen on trakt
+if options[:trakt]
+  traktconfig =  YAML.load File.open("#{Dir.home}/.traktrc")
+  @trakt = Traktr::Client.new(traktconfig["api_key"], traktconfig["username"], traktconfig["password"], true)
+  show      = ToName.to_name(file)
+  info      = @trakt.search.shows(show.name)
+  @episodes = @trakt.show.season(info[0].title, show.series)
+  res       = @trakt.show.episode.seen(info[0], @episodes[show.episode-1..show.episode-1])
+end
