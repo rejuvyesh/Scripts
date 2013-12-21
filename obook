@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+dmenu_opts = "-b -i -fn '-xos4-terminus-medium-*-*-*-12-*-*-*-*-*-*-*' -nb '#000000' -nf '#FFFFFF' -sb '#ff8c00' -sf '#000000'"
 books = Dir.glob(File.expand_path("~/books/*pdf")).map{|b| File.basename(b)}
-chosen = `echo "#{books.join("\n")}" | dmenu`
+chosen = `echo "#{books.join("\n")}" | dmenu #{dmenu_opts}`
 system "zathura ~/books/#{chosen}" unless chosen.empty?
