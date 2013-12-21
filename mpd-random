@@ -1,0 +1,123 @@
+#!/usr/bin/env ruby
+# -*- encoding: utf-8 -*-
+# Copyright rejuvyesh <mail@rejuvyesh.com>, 2013
+# License: GNU GPL 3 <http://www.gnu.org/copyleft/gpl.html>
+
+require 'socket'
+require 'optparse'
+
+class MPD
+  class ACK < StandardError; end
+
+  Around = 5
+
+  def initialize (host, port, &block)
+    @sock = TCPSocket.open(host, port)
+    @sock.set_encoding('UTF-8')
+
+    raise 'This not MPD' unless /\AOK MPD / === @sock.gets
+    get_filelist
+
+    if block
+      begin
+        block.call(self)
+      ensure
+        close
+      end
+    end
+  end
+
+  def check
+    plinfo = command_kv('status')
+    pllen = plinfo[:playlistlength].to_i
+    song = plinfo[:song].to_i
+    command('delete', "0:#{song - Around}") if song > Around
+    d = Around - (pllen - song) + 1
+    @files.sample(d).each {|it| command('add', it) } if d > 0
+  end
+
+  def close
+    @sock.close
+  end
+
+  private
+
+  def get_filelist
+    @files = []
+
+    command('listall') do
+      |it|
+      _, uri = *it.match(/\Afile:\s*(.+)$/)
+      @files << uri if uri
+    end
+  end
+
+  def command (cmd, *args, &block)
+    result = [] unless block
+
+    @sock.puts(cmd + ' ' + args.map {|it| %Q["#{it}"] }.join(' '))
+
+    while line = @sock.gets
+      break if /\AOK/ === line
+      raise ACK, line if /\AACK/ === line
+
+      if block
+        block.call(line.chomp)
+      else
+        result << line
+      end
+    end
+
+    result unless block
+  end
+
+  def command_kv (cmd, *args)
+    result = {}
+    command(cmd, *args) do
+      |line|
+      _, k, v = *line.match(/\A(\w+):\s*(.*)\Z/)
+      result[k.intern] = v if k and v
+    end
+    result
+  end
+end
+
+class Options
+  attr_reader :daemon, :host, :port
+
+  def initialize (argv)
+    @host = 'localhost'
+    @port = 6600
+    parse(argv)
+  end
+
+  private
+
+  def parse (argv)
+    argv = argv.dup
+    opts = OptionParser.new
+    opts.on('-d', '--daemon') {|v| @daemon = true }
+    opts.on('-h', '--host HOST') {|v| @host = v }
+    opts.on('-p', '--port PORT') {|v| @port = v.to_i }
+    opts.parse(argv)
+  end
+end
+
+options = Options.new(ARGV)
+
+Process.daemon if options.daemon
+
+loop do
+  begin
+    MPD.new(options.host, options.port) do
+      |mpd|
+      loop do
+        mpd.check
+        sleep 10
+      end
+    end
+  rescue Errno::EPIPE, Errno::ECONNREFUSED => e
+    STDERR.puts("Reconnect for #{e}")
+    sleep 10
+  end
+end
