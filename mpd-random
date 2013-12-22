@@ -45,8 +45,7 @@ class MPD
   def get_filelist
     @files = []
 
-    command('listall') do
-      |it|
+    command('listall') do |it|
       _, uri = *it.match(/\Afile:\s*(.+)$/)
       @files << uri if uri
     end
@@ -73,8 +72,7 @@ class MPD
 
   def command_kv (cmd, *args)
     result = {}
-    command(cmd, *args) do
-      |line|
+    command(cmd, *args) do |line|
       _, k, v = *line.match(/\A(\w+):\s*(.*)\Z/)
       result[k.intern] = v if k and v
     end
@@ -109,8 +107,7 @@ Process.daemon if options.daemon
 
 loop do
   begin
-    MPD.new(options.host, options.port) do
-      |mpd|
+    MPD.new(options.host, options.port) do |mpd|
       loop do
         mpd.check
         sleep 10
