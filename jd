@@ -1,0 +1,19 @@
+#!/bin/zsh
+
+# Created by rejuvyesh <rejuvyesh@gmail.com>
+
+JDDIR=~/local/opt/jdownloader
+JDINSTALLER=http://update0.jdownloader.org/jdupdate.jar
+
+if [ -e $JDDIR ]; then
+    cd $JDDIR
+    if [ ! -e $JDDIR/jdupdate.jar ]; then
+        echo "jdupdate not found, downloading..."
+    wget $JDINSTALLER
+  fi
+echo "starting..."
+  java -Xmx512m -jar jdupdate.jar
+else
+echo "$JDDIR doesn't exist..."
+  exit 1
+fi
