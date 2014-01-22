@@ -3,12 +3,26 @@
 # Created by rejuvyesh <rejuvyesh@gmail.com>
 
 phone_type=android
+program=$0
+usage() {
+    cat <<EOM
+    Usage:
+    $program setup     -   Mount phone as an mtp device
+    $program unmount   -   Unmount phone as an mtp device
+    $program mv        -   Copy photos from phone to camera directory
+    $program cleanup   -   Remove photos from phone 
+EOM
+    exit 0
+}
+
+[[ -z $1 ]] && { usage; }
 
 if [[ "$1" = cleanup ]]; then
     echo "Removing downloaded photos from phone..."
 
     case $phone_type in
         android)
+            printf "removing photos"
             rm -f ~/android/SD\ card/DCIM/*/* || true
             sleep 1
             ;;
