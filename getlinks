@@ -1,0 +1,95 @@
+#!/usr/bin/env ruby
+require 'rubygems'
+require 'nokogiri'
+require 'open-uri'
+require 'uri'
+require 'epitools'
+
+
+def absolute_uri(root, url)
+  #pp [:url_join, root, url]
+  URI.join(root, url).to_s
+end
+
+
+def get_page(url)
+  #$stderr.puts "Loading #{url.inspect}..."
+  Nokogiri::HTML(open(url))
+end
+
+
+def relative_url?(url)
+  URI.join(url, url)
+  false
+rescue URI::BadURIError
+  true
+end
+
+
+def get_links(pageurl)
+
+  page = get_page(pageurl)
+  root_is_relative = relative_url?(pageurl)
+
+  result = {
+
+    :links => page.search("a").map { |a|
+      linkurl = a["href"]
+    }.squash,
+    
+    :embeds => page.search("embed").map { |embed|
+      linkurl = embed["src"]
+      #if embed["type"].in? %w(application/x-mplayer2)
+    }.squash,
+    
+    :images => page.search("img").map { |img|
+      linkurl = img["src"]
+    }.squash,
+    
+    :enclosures => page.search("enclosure").map { |e|
+      linkurl = e["url"]
+    }.squash,
+
+  }
+
+  result.map_values! { |links| 
+    links.map { |linkurl|
+      absolute_uri(pageurl, linkurl)
+    }
+  } unless root_is_relative
+  
+  result[:emails] = result[:links].select{|v| v["mailto:"]}
+  result[:links] -= result[:emails]
+  
+  result
+
+end
+
+
+if ARGV.any?
+
+  ARGV.each do |pageurl|
+    puts "### Page URL: #{pageurl}"
+    for category, links in get_links(pageurl)
+      puts "# #{category}"
+      links.each { |link| puts link }
+      puts
+    end
+  end
+
+else
+
+  puts
+  puts "Usage: getlinks <url1> [<url2>, ...]"
+  puts
+  puts "Purpose:"
+  puts "  Returns all the HREFs from the <a href=\"\"> tags in the specificed"
+  puts "  url(s). The links are output to STDOUT, while the status information"
+  puts "  is output to STDERR, so you can pipe the links to 'grep' and/or"
+  puts "  'xargs wget'."
+  puts
+  puts "Example:"
+  puts "  getlinks http://something.com/stuff.html | egrep '\.zip$' | xargs wget"
+  puts
+
+end
