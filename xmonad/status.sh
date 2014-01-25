@@ -169,10 +169,10 @@ watch_fume() {
     
     if [[ $mod_time -gt $last_mod_time ]]; then
         last_mod_time=$mod_time
-        update_bar $1 "$(ti display --start 'today 0:00' -f status)"
+        update_bar $1 "$(ti display --start 'today 0:00' -f status | sed -r 's/^.{3}//')"
     elif [[ $now -gt $(( $last_mod_time + 600 )) ]]; then
         last_mod_time=$now
-        update_bar $1 "$(ti display --start 'today 0:00' -f status)"
+        update_bar $1 "$(ti display --start 'today 0:00' -f status | sed -r 's/^.{3}//')"
     fi
 }
 
