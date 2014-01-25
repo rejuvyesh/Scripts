@@ -1,0 +1,60 @@
+#!/usr/bin/env ruby
+# -*- encoding: utf-8 -*-
+# Copyright rejuvyesh <mail@rejuvyesh.com>, 2014
+# License: GNU GPL 3 <http://www.gnu.org/copyleft/gpl.html>
+
+require 'trollop'
+require 'ruby-mpd'
+require 'libnotify'
+require 'shellwords'
+
+GC.enable
+
+class MpdNotifier
+  def self.notify_change(song)
+    title = song.title ? song.title : 'Unknown Song'
+    artist = song.artist ? song.artist : 'Unknown Artist'
+    album = song.album ? song.album : 'Unknown Album'
+
+    icon = File.exist?('/tmp/mpdcover.png') ? '/tmp/mpdcover.png' : '/usr/share/icons/Faenza/actions/32/player_play.png'
+
+    timeout = 6
+    n = Libnotify.new do |notify|
+      notify.summary    = "Now Playing"
+      notify.body       = "#{artist} - #{title}\n#{album}"
+      notify.timeout    = timeout   
+      notify.urgency    = :normal   # :low, :normal, :critical
+      notify.append     = false     # default true - append onto existing notification
+      notify.transient  = true      # keep the notifications around after display
+      notify.icon_path  = icon
+    end
+    n.show!
+  end
+
+  def self.run
+    opts = Trollop::options do
+      opt :host, "MPD host", default: 'localhost'
+      opt :port, "MPD port", default: 6600
+      opt :music_dir, "MPD music directory", default: "#{ENV["HOME"]}/Music/"
+    end
+    mpd = MPD.new opts[:host], opts[:port]
+    mpd.connect
+    last_status = mpd.status
+    loop do
+      sleep 1
+      current_status = mpd.status
+      song_changed = last_status[:songid] != current_status[:songid]
+      started_playing = last_status[:state] != 'play' && current_status[:state] == 'play'
+      if song_changed || started_playing
+        song = mpd.current_song
+        file = Shellwords.escape(song.file)
+        system "mpdcover #{opts[:music_dir]} #{file} 150 "
+        notify_change(song)
+      end
+      last_status = current_status
+      sleep 1
+    end
+  end
+end
+
+MpdNotifier.run
