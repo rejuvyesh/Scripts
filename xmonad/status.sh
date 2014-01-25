@@ -106,10 +106,10 @@ update_wireless () {
 update_network(){
     local net="$(ip link show wlan0 | grep 'state UP')"
     if [[ -z $net ]]; then
-        update_wired 3 &
+        update_wired 4 &
         sleep 2
     else
-        update_wireless 3 &
+        update_wireless 4 &
         sleep 2
     fi
 
@@ -179,12 +179,12 @@ watch_fume() {
 mypid=$$
 pgrep "$(basename $0)" | grep -v $mypid | xargs kill >>~/log 2>&1
 
-{update_cpuload 1 &
-memory 2 &
+{update_cpuload 2 &
+memory 3 &
 update_network
-update_battery 4 &
-update_volume 5 &
-update_time 6 &
-watch_fume 7 &
+update_battery 5 &
+update_volume 6 &
+update_time 7 &
+watch_fume 1 &
 # I like to have a space at the end
 echo "1023  "} | dmplex
