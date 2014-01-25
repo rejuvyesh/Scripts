@@ -2,4 +2,4 @@
 
 # Created by rejuvyesh <rejuvyesh@gmail.com>
 
-urxvt -name music -e start_ncmpcpp.sh
+urxvt -T music -name music -e start_ncmpcpp.sh
