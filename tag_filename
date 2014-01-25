@@ -1,0 +1,81 @@
+#!/usr/bin/env ruby
+# -*- encoding: utf-8 -*-
+# Copyright muflax <mail@muflax.com>, 2014
+# License: GNU GPL 3 <http://www.gnu.org/copyleft/gpl.html>
+
+# Adds or removes tags to filenames, mostly used to mark books as read.
+#
+# Tag format: "basename_{tag}.extension".
+# - book_{read}.pdf
+# - archive_{scanned}.tar.gz
+# - notes_{read}
+# - notes_{read}_{scanned}.7z
+#
+# Usage:
+# - mark as read:    tag_filename read book.pdf
+# - mark as unread:  tag_filename -read book_{read}.pdf
+# - remove all tags: tag_filename - book_{read}.pdf
+# - add two tags:    tag_filename read_scanned book.pdf
+
+require "trollop"
+
+opts = Trollop::options do
+  opt :pretend, "pretend; don't rename anything"
+  opt :tag,     "tag to use (!tag to remove tag, ! to remove all tags)", :type => :string, :required => true
+end
+
+if ARGV.empty?
+  puts "you gotta tell me what files to work with"
+  exit 1
+end
+
+tag = opts[:tag]
+
+ARGV.each do |file|
+  next unless File.file? file or File.symlink? file
+
+  # parse file name
+  m    = file.match(/^ (?<base> .+?) (?<tags> _{\w+})* (?<ext> (\. .+?)+ )? $/x)
+  base = m[:base]
+  tags = m[:tags] ? m[:tags].scan(/_{(\w+)}/).map{|t, *_| t} : []
+  ext  = m[:ext] || ""
+
+  # add or remove tag
+  case tag
+  when "!"
+    tags = []
+  when /^!\w+$/
+    tag[1..-1].split("_").each do |t|
+      tags.delete t
+    end
+  when /^\w+$/
+    tag.split("_").each do |t|
+      tags << t
+    end
+  else
+    puts "don't understand tag: '#{tag}'"
+    exit 1
+  end
+
+  # normalize tags
+  tags = tags.uniq.sort
+
+  # rename file
+  new_file = "#{base}#{tags.map{|t| "_{#{t}}"}.join}#{ext}"
+
+  if file == new_file
+    # nothing to do here, skipping
+    next
+  end
+
+  if File.exists? new_file
+    puts "skipping '#{file}' because '#{new_file}' already exists"
+    next
+  end
+
+  if opts[:pretend]
+    puts "'#{file}' -> '#{new_file}'"
+  else
+    File.rename(file, new_file)
+  end
+end
