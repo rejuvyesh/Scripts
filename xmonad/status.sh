@@ -44,7 +44,7 @@ update_bar () {
 
 update_time () {
 	  while true; do
-		    update_bar $1 "^ca(1,calendar.sh)$ICON_TIME^ca()" "$(date '+%a %-d %b %Y ^ca(1, todostatus.sh)^fg(white)%H:%M^fg():%S^ca()')"
+		    update_bar $1 "^ca(1,calendar.sh)$ICON_TIME^ca()" "$(date '+%a %-d %b %Y ^ca(1, fuzzydate.sh)^fg(white)%H:%M^fg():%S^ca()')"
 		    sleep 1
 	  done
 }
