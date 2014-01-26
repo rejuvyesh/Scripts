@@ -22,7 +22,7 @@ class MpdNotifier
     n = Libnotify.new do |notify|
       notify.summary    = "Now Playing"
       notify.body       = "#{artist} - #{title}\n#{album}"
-      notify.timeout    = timeout   
+      notify.timeout    = timeout
       notify.urgency    = :normal   # :low, :normal, :critical
       notify.append     = false     # default true - append onto existing notification
       notify.transient  = true      # keep the notifications around after display
@@ -43,17 +43,17 @@ class MpdNotifier
 
     if cover.nil?
       exec("glyrc cover --artist #{Shellwords.escape(artist)} \
-                          --album #{Shellwords.escape(album)} \
-                          --formats 'jpeg:jpg' \
-                          --write #{File.join(art, 'Cover.jpeg')}") \
-                          if fork.nil?
+                           --album #{Shellwords.escape(album)} \
+                           --formats 'jpeg:jpg' \
+                           --write #{File.join(art, 'Cover.jpeg')}") \
+                           if fork.nil?
       File.delete(temp_path) if File.exist?(temp_path)
     else
       system "convert #{Shellwords.escape(cover)} \
                       -thumbnail #{cover_resize} \
                       -gravity center \
                       -background #{cover_background}\
-                       -extent #{cover_resize} #{temp_path}"
+                      -extent #{cover_resize} #{temp_path}"
     end
   end
 
@@ -62,10 +62,13 @@ class MpdNotifier
       opt :host, "MPD host", default: 'localhost'
       opt :port, "MPD port", default: 6600
       opt :music_dir, "MPD music directory", default: "#{ENV["HOME"]}/Music/"
+      opt :daemon, "Daemonize?", default: false
     end
+
     mpd = MPD.new opts[:host], opts[:port]
     mpd.connect
     last_status = mpd.status
+    Process.daemon if opts[:daemon]
     loop do
       sleep 1
       current_status = mpd.status
