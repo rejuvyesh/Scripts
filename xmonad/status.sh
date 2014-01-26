@@ -164,16 +164,18 @@ memory(){
 
 # fume
 watch_fume() {
-    mod_time=$(stat -c "%Y" $fume_db)
-    now=$(date "+%s")
+    while true; do
+        mod_time=$(stat -c "%Y" $fume_db)
+        now=$(date "+%s")
     
-    if [[ $mod_time -gt $last_mod_time ]]; then
-        last_mod_time=$mod_time
-        echo $1 "$(ti display --start 'today 0:00' -f status | sed -r 's/^.{3}//')"
-    elif [[ $now -gt $(( $last_mod_time + 600 )) ]]; then
-        last_mod_time=$now
-        echo $1 "$(ti display --start 'today 0:00' -f status | sed -r 's/^.{3}//')"
-    fi
+        if [[ $mod_time -gt $last_mod_time ]]; then
+            last_mod_time=$mod_time
+            echo $1 "$(ti display --start 'today 0:00' -f status | sed -r 's/^.{3}//')"
+        elif [[ $now -gt $(( $last_mod_time + 600 )) ]]; then
+            last_mod_time=$now
+            echo $1 "$(ti display --start 'today 0:00' -f status | sed -r 's/^.{3}//')"
+        fi
+    done
 }
 
 mypid=$$
