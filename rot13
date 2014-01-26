@@ -1,0 +1,3 @@
+#!/bin/zsh
+
+tr a-mA-Mn-zN-Z n-zN-Za-mA-M
