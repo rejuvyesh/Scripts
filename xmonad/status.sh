@@ -67,7 +67,7 @@ update_battery() {
 		    elif echo $bat_text | grep -q Full; then
 			      bat_text='100% (Full)'
 		    else
-			      bat_text='No battery'
+			      bat_text='AC'
 		    fi
 
 		    update_bar $1 "$bat_icon" "$bat_text"
@@ -169,10 +169,10 @@ watch_fume() {
     
     if [[ $mod_time -gt $last_mod_time ]]; then
         last_mod_time=$mod_time
-        update_bar $1 "$(ti display --start 'today 0:00' -f status | sed -r 's/^.{3}//')"
+        echo $1 "$(ti display --start 'today 0:00' -f status | sed -r 's/^.{3}//')"
     elif [[ $now -gt $(( $last_mod_time + 600 )) ]]; then
         last_mod_time=$now
-        update_bar $1 "$(ti display --start 'today 0:00' -f status | sed -r 's/^.{3}//')"
+        echo $1 "$(ti display --start 'today 0:00' -f status | sed -r 's/^.{3}//')"
     fi
 }
 
