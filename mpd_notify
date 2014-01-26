@@ -31,6 +31,32 @@ class MpdNotifier
     n.show!
   end
 
+  def self.getcover(music_dir, file, resize, artist, album)
+    img_reg = "(Front|front|Cover|cover|Art|art|Folder|folder)\.(jpg|jpeg|png|gif)"
+    temp_path = '/tmp/mpdcover.png'
+    cover_resize = resize.nil? ? '100x100' : "#{resize}x#{resize}"
+    cover_background = 'none'
+
+    art = File.dirname(File.join("#{music_dir}", "#{(file)}"))
+    cover = %x(find "#{art}/" -maxdepth 1 -type f \
+               | egrep -i -m1 "#{img_reg}").delete("\n")
+
+    if cover.nil?
+      exec("glyrc cover --artist #{Shellwords.escape(artist)} \
+                          --album #{Shellwords.escape(album)} \
+                          --formats 'jpeg:jpg' \
+                          --write #{File.join(art, 'Cover.jpeg')}") \
+                          if fork.nil?
+      File.delete(temp_path) if File.exist?(temp_path)
+    else
+      system "convert #{Shellwords.escape(cover)} \
+                      -thumbnail #{cover_resize} \
+                      -gravity center \
+                      -background #{cover_background}\
+                       -extent #{cover_resize} #{temp_path}"
+    end
+  end
+
   def self.run
     opts = Trollop::options do
       opt :host, "MPD host", default: 'localhost'
@@ -47,8 +73,8 @@ class MpdNotifier
       started_playing = last_status[:state] != 'play' && current_status[:state] == 'play'
       if song_changed || started_playing
         song = mpd.current_song
-        file = Shellwords.escape(song.file)
-        system "mpdcover #{opts[:music_dir]} #{file} 150 "
+        file = song.file
+        getcover(opts[:music_dir], file, 150, song.artist, song.album)
         notify_change(song)
       end
       last_status = current_status
