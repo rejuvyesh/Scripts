@@ -19,10 +19,11 @@ H="13"
 WIDTH="1366"
 HEIGHT="768"
 
+TRAYER="trayer --edge bottom --align right --SetDockType true --SetPartialStrut true --expand true --width 28 --height $H --transparent true --tint 0x000000 --alpha 10 --widthtype pixel"
 
 DZEN="dzen2 -p -fg '$FG' -bg '$BG' -fn '$FN' -e '$E' -h '$H' -y '$(($HEIGHT - $H))'"
 DZEN_LEFT="$DZEN -x '0' -w '566' -ta 'l'"
-DZEN_RIGHT="$DZEN -w '800' -x '$(( $WIDTH - 800 ))' -ta 'r'"
+DZEN_RIGHT="$DZEN -w '$(( 800 - 28 ))' -x '$(( $WIDTH - 800 ))' -ta 'r'"
 
 # make 2 pipes - one for xmonad's output and one for the status bar
 XPIPE=~/.xmonad/xmonad-pipe
@@ -46,3 +47,6 @@ eval "$DZEN_LEFT < $XPIPE &"
 
 # launch status dzen
 eval "$DZEN_RIGHT < $SPIPE &"
+
+# launch trayer
+eval "$TRAYER &"
