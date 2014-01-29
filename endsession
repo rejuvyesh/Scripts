@@ -2,7 +2,7 @@
 
 theMessage=$(fortune -e)
 
-gxmessage $theMessage -center -title "Take action" -geometry 500 -wrap -font "DejaVu Sans 8" -default "Exit" -buttons "_Cancel":1,"_Reboot":2,"_Shut down":3 >/dev/null
+gxmessage $theMessage -center -title "Take action" -geometry 500 -wrap -font "DejaVu Sans 8" -default "Exit" -buttons "_Cancel":1,"_Reboot":2,"_Shut down":3,"_KillX":4 >/dev/null
 
 case $? in
     1)
@@ -11,5 +11,7 @@ case $? in
         sudo shutdown -r now;;
     3)
         sudo shutdown -h now;;
+    4)
+        sudo pkill X
 esac
 
