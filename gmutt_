@@ -1,0 +1,3 @@
+#!/bin/zsh
+
+urxvt -T 'mutt' -name 'mutt' -e zsh -c 'LOCAL_CONFIG=iitk /usr/bin/mutt'
