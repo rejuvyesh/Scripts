@@ -1,0 +1,15 @@
+#!/bin/zsh
+
+theMessage=$(fortune -e)
+
+gxmessage $theMessage -center -title "Take action" -geometry 500 -wrap -font "DejaVu Sans 8" -default "Exit" -buttons "_Cancel":1,"_Reboot":2,"_Shut down":3 >/dev/null
+
+case $? in
+    1)
+        echo "Exit";;
+    2)
+        sudo shutdown -r now;;
+    3)
+        sudo shutdown -h now;;
+esac
+
