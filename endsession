@@ -8,9 +8,9 @@ case $? in
     1)
         echo "Exit";;
     2)
-        sudo shutdown -r now;;
+        sudo systemctl reboot;;
     3)
-        sudo shutdown -h now;;
+        sudo systemctl poweroff;;
     4)
         sudo pkill X
 esac
