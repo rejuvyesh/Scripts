@@ -6,7 +6,7 @@ then
 echo "Environment variable IRSSI_PATH not set."
     exit
 fi
-
+net-wait
 tmux new-session -d -s ircuser
 tmux split-window -t ircuser -h -l 20
 

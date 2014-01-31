@@ -2,6 +2,7 @@
 
 loaded?() {
     grep -qE 'wlan|eth|ath|wlp' /proc/net/route
+    pidof firewall
 }
 
 while ! loaded?; do
