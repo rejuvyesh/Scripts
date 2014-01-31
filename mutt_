@@ -1,6 +1,5 @@
 #!/bin/zsh
 
 # Created by rejuvyesh
-source ~/.zsh/zsh_aliases
 
 urxvt -T 'mutt' -name 'mutt' -e zsh -c 'LOCAL_CONFIG=iitk /usr/bin/mutt'
