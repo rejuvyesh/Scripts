@@ -175,6 +175,7 @@ watch_fume() {
             last_mod_time=$now
             echo $1 "$(ti display --start 'today 0:00' -f status | sed -r 's/^.{3}//')"
         fi
+        sleep 10
     done
 }
 
