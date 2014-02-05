@@ -4,7 +4,7 @@ DIR="${HOME}/images/screenshots"
 DATE="$(date +%Y%m%d@%H%M%S)"
 NAME="${DIR}/screenshot-${DATE}.png"
 LOG="${DIR}/screenshots.log"
-
+LATEST="${DIR}/latest.png"
 # Check if the dir to store the screenshots exists, else create it: 
 if [ ! -d "${DIR}" ]; then mkdir -p "${DIR}"; fi 
 
@@ -24,4 +24,6 @@ if [[ $# = 0 ]]; then
 else
   # Save the screenshot in the directory and edit the log
   echo "${NAME}" >> "${LOG}"
+  rm -f "${LATEST}"
+  ln -sf "${NAME}" "${LATEST}"
 fi
