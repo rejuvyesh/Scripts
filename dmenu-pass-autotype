@@ -1,0 +1,30 @@
+#!/usr/bin/env zsh
+set -ue
+
+password_store="$HOME/.password-store"
+
+# make sure the password store exists
+if [[ ! -d "$password_store" ]]; then
+  printf "Configure \$password_store within $(command -v dmenu-pass-autotype).\n" 1>&2
+  printf "Its default location, $password_store, does not exist.\n" 1>&2
+  exit 1
+fi
+
+# discern a list of possibilities
+candidates="$(find "$password_store" -name '*gpg' -print0 |
+  tr "\0" "\n" | 
+  sed "s#$password_store/##;s#\.gpg\$##")"
+
+# ask which
+choice="$(printf "$candidates" | sort | dmenu -p 'autotype' | chomp)"
+
+# fail if they didn't supply anything
+if [[ -z "$choice" ]]; then
+  exit 2
+fi
+
+# notify which we found, using stderr so it isn't piped to anything else
+printf "Using $choice.\n" 1>&2
+
+# delegate to pass 
+exec pass-autotype "$choice" $*

@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -ue
+
+# make sure the dependencies are installed
+if ! command -v xdotool &> /dev/null; then
+  printf "You need to install xdotool.\n" >&2
+  exit 1
+fi
+
+if [[ "$#" -lt 1 ]]; then
+  printf "Usage: pass-autotype password" >&2
+  exit 2
+fi
+
+# get the deets
+output="$(pass $@)"
+
+# fail fast if it doesn't exist
+exit_code="$?"
+if [[ "$exit_code" -gt 0 ]]; then
+  exit "$exit_code" # $? is the result of [[ now
+fi
+
+# extract the junk we want
+password="$(printf "%s" "$output" | head -n 1)"
+username="$(printf "%s" "$output" | grep '^username: ' | cut -c 11-)"
+
+# send those key presses to the window
+active_window_id="$(xdotool getactivewindow)"
+
+if [[ -n "$password" ]]; then
+  if [[ -n "$username" ]]; then
+    xdotool type --window "$active_window_id" "$username"
+    xdotool key --window "$active_window_id" "Tab"
+  fi
+
+  xdotool type --window "$active_window_id" "$password"
+  xdotool key --window "$active_window_id" "Return"
+fi
