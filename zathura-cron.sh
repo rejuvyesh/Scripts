@@ -1,0 +1,27 @@
+#!/bin/sh
+#
+# File: zathura-cron.sh
+#
+# Created: Sunday, March  2 2014 by rejuvyesh <mail@rejuvyesh.com>
+# License: GNU GPL 3 <http://www.gnu.org/copyleft/gpl.html>
+#
+
+export DISPLAY=:0
+export PATH=/usr/bin:$HOME/local/bin:$HOME/dev/scripts
+
+property() {
+    xwininfo -root -tree \
+        | awk -F\" "/$1/{print \$1}" \
+        | xargs -I{} xprop -id {} "$2" \
+        | awk -F\" '$0!~/not found/{print $2}'
+};
+
+zathura_open() {
+    psgrep ' zathura ' &>/dev/null
+};
+
+zathura_files() {
+    property "Zathura" "_ZATHURA_FILEPATH"
+};
+
+zathura_open && (zathura_files > ~/.local/share/zathura/state)

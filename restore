@@ -1,0 +1,12 @@
+#!/bin/zsh
+
+# Created by rejuvyesh <rejuvyesh@gmail.com>
+
+case $1 in
+    zathura)
+        while read pdf; do
+            echo $pdf
+            zathura $pdf &
+        done < ~/.local/share/zathura/state
+    ;;
+esac
