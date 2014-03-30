@@ -1,3 +1,0 @@
-#!/bin/zsh
-
-urxvt -T 'mutt' -name 'mutt' -e zsh -c 'LOCAL_CONFIG=gmail /usr/bin/mutt'

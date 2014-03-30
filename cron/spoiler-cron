@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# Created by rejuvyesh <rejuvyesh@gmail.com>
+
+cd /home/rejuvyesh/Documents/spoiler/
+/usr/bin/git add -A
+/usr/bin/git commit -am "update `date`"
