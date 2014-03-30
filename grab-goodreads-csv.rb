@@ -6,7 +6,6 @@
 # Copyright rejuvyesh <mail@rejuvyesh.com>, 2013
 # License: GNU GPL 3 <http://www.gnu.org/copyleft/gpl.html>
 
-
 require "cri"
 require "mechanize"
 
@@ -24,7 +23,8 @@ command = Cri::Command.define do
   required :p, :password, 'password'
 
   run do |opts, args, cmd|
-    output = args.shift
+
+    output = args.first
 
     if output.nil?
       puts "output file required"
@@ -48,7 +48,7 @@ command = Cri::Command.define do
     login_form['user[email]'] = opts[:user]
     login_form['user[password]'] = opts[:password]
 
-    page = agent.submit login_form
+    agent.submit login_form
 
     puts "signed in to goodreads"
     puts "Getting CSV"
@@ -63,7 +63,6 @@ command = Cri::Command.define do
     puts "writing to file..."
 
     File.open(output, 'w') { |file| file.write(csv_content) }
-      
   end
 end
 
