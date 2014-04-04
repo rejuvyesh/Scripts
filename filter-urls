@@ -26,6 +26,7 @@ cat /dev/stdin \
        -e "^lesswrong.com/r/discussion/comments$" -e "^lesswrong.com/user/gwern$" \
        -e "^webcitation.org/query$" \
        -e "0.0.0.0" \
+       -e "172.*" \
        -e "ftp.*" -e "6..6\.com" -e "6..9\.com" -e "6??6\.com" -e "7..7\.com" -e "7..8\.com" -e "7..\.com" \
        -e "78..\.com" -e "7??7\.com" -e "8..8\.com" -e "8??8\.com" -e "9..9\.com" -e "9??9\.com" \
        -e "aa-tw.com" -e "ca..\.38.*\.com" -e "lx...\.com" -e "www.bulk*" -e dm6.*\.com.cn \
