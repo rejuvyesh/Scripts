@@ -1,0 +1,12 @@
+#!/bin/zsh
+
+# Created by rejuvyesh <mail@rejuvyesh.com>
+
+
+if [ "$1" == "" ]; then
+    echo "Usage: tile-image <n>x<m> [input images] [output image]"
+    echo
+    echo "(creates an n-by-m grid out of the input images)"
+else
+    montage -mode concatenate -tile $*
+fi
