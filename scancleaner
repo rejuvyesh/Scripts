@@ -1,7 +1,5 @@
 #!/usr/bin/env ruby
 
-# Created by rejuvyesh <mail@rejuvyesh.com>
-
 # From https://gist.github.com/lelandbatey/8677901
 
 infile, outfile = ARGV
