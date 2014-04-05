@@ -1,0 +1,56 @@
+#!/usr/bin/env ruby
+
+class Fixnum
+  def round nearest
+    y = self.fdiv nearest
+    q = (y+0.5).floor
+    q*nearest
+  end
+
+  def to_hour_word
+    words = {
+      00 => 'twelve',
+      1  => 'one',
+      2  => 'two',
+      3  => 'three',
+      4  => 'four',
+      5  => 'five',
+      6  => 'six',
+      7  => 'seven',
+      8  => 'eight',
+      9  => 'nine',
+      10 => 'ten',
+      11 => 'eleven',
+      12 => 'twelve',
+    }.values
+    (self < words.length) ? words[self] : raise 
+  end
+end
+
+class Time
+  def to_fuzzy
+    minute = self.min - (30)
+
+    if minute < 0
+      hour = self.hour
+      connective = 'past'
+    else
+      hour = self.hour.succ
+      connective = 'to'
+    end 
+    
+    hour = hour.modulo(12).to_hour_word
+
+    case minute.round(15).abs
+      when 0  then "half #{connective} #{hour}"
+      when 5  then "twenty five #{connective} #{hour}"
+      when 10 then "twenty #{connective} #{hour}"
+      when 15 then "quarter #{connective} #{hour}"
+      when 20 then "ten #{connective} #{hour}"
+      when 25 then "five #{connective} #{hour}"
+      when 30 then "#{hour} o'clock"
+    end
+  end
+end
+
+puts Time.now.to_fuzzy

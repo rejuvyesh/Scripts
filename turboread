@@ -1,0 +1,390 @@
+#!/usr/bin/env ruby
+#######################################################################################################
+# --------------------------------------------------------------
+# TurboReader Pro! (c) 2014 by Chris Gahan (chris@ill-logic.com)
+# --------------------------------------------------------------
+# Speed-read your favourite text files!
+#
+# (Based on principles outlined here: http://www.spritzinc.com/the-science/)
+#
+#######################################################################################################
+
+require 'io/console'
+
+#######################################################################################################
+
+class Words
+
+  PUNCTUATION = /[\.\?,!:]/
+  MAX_WORD_SIZE = 20
+
+  # The point at which to center the word (in percent).
+  # See: http://www.microsoft.com/typography/ctfonts/wordrecognition.aspx
+  OPTIMAL_RECOGNITION_POINT = 0.30 
+
+  attr_accessor :longest_word
+
+  def initialize(filename)
+    @pos    = 0
+
+    text    = File.read(filename)
+    @words  = text.split.select { |w| w =~ /[a-z]+/i }.map do |w|
+      # break up very long words into: pi… …ece… …sof… …thew… …ord…
+      if w.size > MAX_WORD_SIZE
+        pieces     = w.each_char.each_slice(MAX_WORD_SIZE).map { |piece| "…#{piece.join}…" }
+        pieces[0]  = pieces[0][1..-1]  # remove … from beginning of first piece
+        pieces[-1] = pieces[-1][0..-2] # remove … from end       of last  piece
+        pieces
+      else
+        w
+      end
+    end.flatten
+    @longest_word = @words.max_by(&:size).size
+
+    # p @words.max_by(&:size) # show longest word
+  end
+
+  def make_pos_legal!
+    @pos = [[0,@pos].max, @words.size-1].min # clamp to range
+  end
+
+  def next
+    @pos += 1
+    make_pos_legal!
+    current
+  end
+
+  def prev
+    @pos -= 1
+    make_pos_legal!
+    current
+  end
+
+  def first
+    @pos = 0
+    current
+  end
+
+  def last
+    @pos = @words.size-1
+    current
+  end
+
+  def current
+    @words[@pos]
+  end
+
+  def current_punctuated?
+    current =~ /#{PUNCTUATION}$/
+  end
+
+  def current_orp
+    (current.size * OPTIMAL_RECOGNITION_POINT).round
+  end
+
+end
+
+
+#######################################################################################################
+# ANSI codes:
+#   http://en.wikipedia.org/wiki/ANSI_escape_code#CSI_codes
+
+class Display
+
+  DEFAULTWPM = 600
+  MAXWPM     = 4000
+  MINWPM     = 100
+
+  def initialize(filename)
+    @wpm          = DEFAULTWPM
+    @words        = Words.new(filename)
+    @width        = @words.longest_word
+    @paused       = true
+    @help         = false
+    @current_word = ""
+
+    print_main_template
+
+    first_word
+  end
+
+  #----------------------------------------------------------
+
+  def set_wpm(wpm)
+    @wpm = [[wpm, MINWPM].max, MAXWPM].min # ensure wpm is between 100 and 4000
+    print_current_word
+  end
+
+  def increase_wpm(amount)
+    set_wpm @wpm + amount
+  end
+
+  def decrease_wpm(amount)
+    set_wpm @wpm - amount
+  end
+
+  def wpm_delay
+    delay = 60.0/@wpm
+    delay *= 2 if @words.current_punctuated?
+    delay
+  end
+
+  #----------------------------------------------------------
+
+  def display_word(word)
+    @current_word = word
+    print_current_word
+  end
+
+  def next_word
+    display_word @words.next
+  end
+
+  def prev_word
+    display_word @words.prev
+  end
+
+  def first_word
+    display_word @words.first
+  end
+
+  def last_word
+    display_word @words.last
+  end
+
+  #----------------------------------------------------------
+
+  # TODO: Read the x,y positions from the status and
+  #       word lines from the terminal, so we don't have
+  #       to do all this gross relative positioning.
+
+  def print_main_template
+    extender         = "─"*(@width-2)
+    top_line         = "───────┬─#{extender}"
+    bottom_line      = "───────┴─#{extender}"
+    @template_center = 8
+    @word_area_size  = top_line.size
+
+    puts "========================================"
+    puts "  TurboReader PRO! Get ready to READ!"
+    puts "==========(press ? for help)============"
+    puts
+    puts top_line
+    puts
+    puts bottom_line
+    puts
+  end
+
+  def print_current_word
+    wpm_indicator = paused? ? "(PAUSED!)" : "(#{@wpm} wpm)"
+    word          = (@current_word || "")
+    padding       = @width - word.size
+    red_char_pos  = @words.current_orp
+    indent        = @template_center - red_char_pos
+
+    # Colorize the center character
+    if word.size >= 2
+      word = word[0...red_char_pos] +
+             "\e[31;1m" + 
+             word[red_char_pos] +
+             "\e[0m" +
+             word[red_char_pos+1..-1]
+    end
+
+    print "\e[3F\e[K" # move to start of word area (3 lines up) and clear line
+    print "\e[#{indent}G" # move to position of word
+    print word
+    print "\e[#{@word_area_size+2}G#{wpm_indicator}"
+    print "\e[3E" # move down to status area
+  end
+
+  def show_message(message)
+    print "\e[0G\e[K\e[F\e[K\e[E" # clear the status area
+    print message
+    print "\e[0G"
+  end
+
+  def toggle_help!
+    @help = !@help
+
+    if @help
+      show_message "\e[F Q/^C = Quit | SPACE = Pause | Left/Right = Skip word | HOME/END = Start/End\e[E" +
+                   " Up/Down = Increase/decrease wpm by 50 | 1-9 = Set wpm to <n> * 100\e[0G"
+    else
+      # show_message "\e[E"
+      show_message ""
+    end
+  end
+
+  def paused?
+    @paused
+  end
+
+  def pause!
+    @paused = !@paused
+    print_current_word
+  end
+
+  def quit!
+    # quit
+    show_message "Thank you for reading!\e[2S"
+    exit
+  end
+end
+
+#######################################################################################################
+# A little DSL for defining keyboard commands
+
+class KeyMap
+
+  attr_accessor :config
+
+  #-----------------------------------------------------------------
+
+  class Config
+
+    NAMED_KEYS = {
+      :up     => "\e[A",
+      :down   => "\e[B",
+      :left   => "\e[C",
+      :right  => "\e[D",
+      :home   => "\eOH",
+      :end    => "\eOF",
+      :pgup   => "\e[5~",
+      :pgdown => "\e[6~",
+    }
+
+    attr_accessor :trie_root
+
+    def initialize(&block)
+      @trie_root = {}
+
+      instance_eval(&block)
+
+      # Make sure ^C is defined
+      @trie_root["\C-c"] ||= { handler: proc { exit } }
+    end
+
+    #
+    # Add a command to the trie of input sequences
+    #
+    def key(*seqs, &block)
+      seqs.each do |seq|
+        if keycode = NAMED_KEYS[seq]
+          seq = keycode
+        end
+
+        level = @trie_root
+
+        seq.each_char do |c|
+          level = (level[c] ||= {})
+        end
+        
+        level[:handler] = block
+      end
+    end
+
+    #
+    # This block will be run if the key isn't defined.
+    #
+    def default(&block)
+      if block_given?
+        @default = block
+      else
+        @default
+      end
+    end
+  end
+
+  #-----------------------------------------------------------------
+
+  def initialize(&block)
+    @config = Config.new(&block)
+  end
+
+  def process(input)
+    level = config.trie_root
+
+    # Read one character at a time from the input, and incrementally
+    # walk through levels of the trie until a :handler is found, or
+    # we hit a dead-end in the trie.
+    loop do
+      c = input.getc
+
+      if found = level[c]
+        level = found
+
+        if handler = level[:handler]
+          handler.call(c)
+          level = config.trie_root
+        end
+      else
+        config.default.call(c) if config.default
+        level = config.trie_root
+      end
+    end
+  end
+
+end
+
+#######################################################################################################
+
+if $0 == __FILE__
+  if ARGV.empty?
+    puts "Usage: turboread <filename.txt>"
+    exit 1
+  end
+
+  filename = ARGV.first
+
+  unless File.exists? filename
+    puts "Error: #{filename.inspect} not found."
+    exit 2
+  end
+
+  display = Display.new filename
+
+  keymap = KeyMap.new do
+    key(" ")      { display.pause! }
+    key(:up)      { display.increase_wpm(50) }
+    key(:down)    { display.decrease_wpm(50) }
+
+    key(:pgup)    { display.increase_wpm(200) }
+    key(:pgdown)  { display.decrease_wpm(200) }
+
+    key(:left)    { display.next_word }
+    key(:right)   { display.prev_word }
+    key(:home)    { display.first_word }
+    key(:end)     { display.last_word }
+
+    key( *("1".."9").to_a ) { |c| display.set_wpm c.to_i*100 }
+    key( "0" ) { display.set_wpm 1000 }
+
+    key("?", "/", "h")    { display.toggle_help! }
+    key("q", "Q", "\C-c") { display.quit! }
+
+    default { |c| display.show_message " Unknown command: #{c}" }
+  end
+
+  #------------------------------------------------------
+  # thread1: handle keyboard events
+  keyboard_thread = Thread.new do
+    STDIN.raw do |input|
+      keymap.process(input)
+    end
+  end
+
+  #------------------------------------------------------
+  # thread2: read the text
+  reading_thread = Thread.new do
+    loop do
+      display.next_word unless display.paused?
+      sleep display.wpm_delay
+    end
+    display.quit!
+  end
+
+  #------------------------------------------------------
+  # Yield control of the program to the keyboard thread.
+  keyboard_thread.join 
+end
