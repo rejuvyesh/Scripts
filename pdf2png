@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+# -*- encoding: utf-8 -*-
+# Copyright rejuvyesh <mail@rejuvyesh.com>, 2014
+# License: GNU GPL 3 <http://www.gnu.org/copyleft/gpl.html>
+
+infile, prefix = ARGV
+
+if infile.nil?
+  puts 'Usage: pdf2png <input pdf> <prefix>'
+  exit 1
+elsif prefix.nil?
+  prefix = "#{File.basename(infile, ".pdf")}"
+end
+
+cmd = ['pdftoppm', '-png', infile, prefix]
+
+puts cmd
+
+system *cmd
+
+system 'ls -l', "#{File.absolute_path(infile)}/*"
