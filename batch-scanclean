@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+# -*- encoding: utf-8 -*-
+# Copyright rejuvyesh <mail@rejuvyesh.com>, 2014
+# License: GNU GPL 3 <http://www.gnu.org/copyleft/gpl.html>
+
+ARGV.each{ |fn|
+  if fn =~ /\.(png|jpg|jpeg)\Z/
+    system 'scancleaner', fn
+  end
+}
