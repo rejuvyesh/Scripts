@@ -6,13 +6,14 @@
 require 'muflax'
 
 File.load('~/.hs_packages').each do |line|
-  next if line.starts_with? '#' || line.empty?
+  next if (line.starts_with? '#') || line.chomp!.blank?
 
   pkg = line.strip
   if pkg.index(/:path/)
-    puts "Need to install #{pkg}"
+    ap "Need to install #{pkg}"
   else
     puts "getting #{pkg}..."
     system "cabal install #{pkg}"
   end
+
 end

@@ -5,7 +5,7 @@
 require 'muflax'
 
 File.load('~/.go_packages').each do |line|
-  next if line.starts_with? '#' || line.blank?
+  next if (line.starts_with? '#') || line.chomp!.blank?
 
   pkg = line.strip
 
