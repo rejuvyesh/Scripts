@@ -6,13 +6,14 @@ source ~/.zshrc
 
 MOUNTED_DRIVE="/media/rejuvyesh-disk"
 BACKUP_DIR="$MOUNTED_DRIVE/backup"
+BUPBACKUP_DIR="$BACKUP_DIR/home"
 DATE_FORMAT="+%Y-%m-%d"
 
-function is_locked() {
+is_locked() {
     # check for lockfile
-    if [[ -f /tmp/rbs.lock ]]; then
+    if [[ -f /tmp/horcrux.lock ]]; then
         # process already running?
-        if [[ "$(ps -p $(cat /tmp/rbs.lock) | wc -l)" -gt 1 ]]; then
+        if [[ "$(ps -p "$(cat /tmp/horcrux.lock)" | wc -l)" -gt 1 ]]; then
             echo "locked"
             return
         fi
@@ -26,23 +27,30 @@ if [[ $(is_locked) == "locked" ]]; then
 fi
 
 # create lockfile
-rm -f /tmp/rbs.lock
-echo $$ > /tmp/rbs.lock
+rm -f /tmp/horcrux.lock
+echo $$ > /tmp/horcrux.lock
 
 if mountpoint -q $MOUNTED_DRIVE; then # check for mounted drive
     echo "update local bup index..."
     cd $HOME # do it here so that the bupignore paths work without rewriting
-    ionice -c3 bup -d $BACKUP_DIR index -u $HOME --xdev --exclude-from $HOME/.bupignore
+    ionice -c3 bup -d $BUPBACKUP_DIR index -u $HOME --xdev --exclude-from $HOME/.bupignore
 
     # start backup
     echo "copy bup packs..."
     branch="$(hostname)-$(date $DATE_FORMAT)"
-    ionice -c3 bup -d $BACKUP_DIR save -n $branch $HOME
+    ionice -c3 bup -d $BUPBACKUP_DIR save -n "$branch" $HOME
 
     echo "verify bup packs..."
-    cd $BACKUP_DIR/
+    cd $BUPBACKUP_DIR/
     ionice -c3 bup -d . fsck -g -vv
+
+    # backup pacman cache
+    echo "move pacman cache"
+    paccache -m "$MOUNTED_DRIVE/pacman-cache" -k 5
+
 fi
 
+
+
 # remove lockfile
-rm -f /tmp/rbs.lock
+rm -f /tmp/horcrux.lock
