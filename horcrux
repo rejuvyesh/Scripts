@@ -2,12 +2,42 @@
 
 # Created by rejuvyesh <rejuvyesh@gmail.com>
 
-source ~/.zshrc
+HORCRUX_DIRECTORY="$XDG_CONFIG_HOME/horcrux"
 
-MOUNTED_DRIVE="/media/rejuvyesh-disk"
-BACKUP_DIR="$MOUNTED_DRIVE/backup"
-BUPBACKUP_DIR="$BACKUP_DIR/home"
+if [[ ! -d "$HORCRUX_DIRECTORY" ]]; then
+  mkdir -p "$HORCRUX_DIRECTORY"
+fi
+
+# Keep rarely-changing variables here
+if [[ -f "$HORCRUX_DIRECTORY/horcrux.conf" ]]; then
+  source "$HORCRUX_DIRECTORY/horcrux.conf"
+else
+  printf "$(basename $0): configuration file $HORCRUX_DIRECTORY/horcrux.conf not found.\n"
+  printf "File created. Populate it with your own details.\n"
+  cat > "$HORCRUX_DIRECTORY/horcrux.conf" <<EOF
+DESTINATION_DRIVE="/media/disk/"
+ENCRYPT_KEY=ABCD1234     # Public key ID to encrypt backups with
+VERBOSITY=5              # Logs all the file changes (see duplicity man page)
+BACKUP_BASENAME='backup' # Directory name for local backups (i.e., destination
+                         # /Volumes/my_drive/backup/ or /media/my_drive/backup/)
+DUP_PARAMS=''            # Parameters to pass to Duplicity
+EOF
+  exit 1
+fi
+
+LOG_FILE="$HORCRUX_DIRECTORY/horcrux.log"
 DATE_FORMAT="+%Y-%m-%d"
+
+if [[ -d "$DESTINATION_DRIVE/$BACKUP_BASENAME" ]]; then
+  BUPBACKUP_DIR="$DESTINATION_DRIVE/$BACKUP_BASENAME/home"
+  DUPBACKUP_DIR="$DESTINATION_DRIVE/$BACKUP_BASENAME/duplicity"
+fi
+
+# Set duplicity parameters
+name="$(hostname)-$(date $DATE_FORMAT)"
+DUP_PARAMS="-v$VERBOSITY --name $name --allow-source-mismatch --encrypt-key $ENCRYPT_KEY $DUP_PARAMS"
+
+
 
 is_locked() {
     # check for lockfile
@@ -30,27 +60,31 @@ fi
 rm -f /tmp/horcrux.lock
 echo $$ > /tmp/horcrux.lock
 
-if mountpoint -q $MOUNTED_DRIVE; then # check for mounted drive
+if mountpoint -q $DESTINATION_DRIVE; then # check for mounted drive
     echo "update local bup index..."
     cd $HOME # do it here so that the bupignore paths work without rewriting
-    ionice -c3 bup -d $BUPBACKUP_DIR index -u $HOME --xdev --exclude-from $HOME/.bupignore
+    ionice -c3 bup -d $BUPBACKUP_DIR index -u $HOME --xdev --exclude-from $BUP_IGNORE 2>&1 | tee -a "$LOG_FILE"
 
     # start backup
     echo "copy bup packs..."
     branch="$(hostname)-$(date $DATE_FORMAT)"
-    ionice -c3 bup -d $BUPBACKUP_DIR save -n "$branch" $HOME
+    ionice -c3 bup -d $BUPBACKUP_DIR save -n "$branch" $HOME 2>&1 | tee -a "$LOG_FILE"
 
     echo "verify bup packs..."
     cd $BUPBACKUP_DIR/
-    ionice -c3 bup -d . fsck -g -vv
+    ionice -c3 bup -d . fsck -g -vv 2>&1 | tee -a "$LOG_FILE"
 
+    # duplicity backup
+    echo "backing up via duplicity"
+    ionice -c3 duplicity incremental --exclude-globbing-filelist \
+      $DUP_IGNORE $DUP_PARAMS "$DUP_SOURCE" \
+      "DUPBACKUP_DIR" \
+      2>&1 | tee -a "$LOG_FILE"
+    
     # backup pacman cache
     echo "move pacman cache"
-    paccache -m "$MOUNTED_DRIVE/pacman-cache" -k 5
-
+    paccache -m "$MOUNTED_DRIVE/pacman-cache" -k 5 2>&1 | tee -a "$LOG_FILE"
 fi
-
-
 
 # remove lockfile
 rm -f /tmp/horcrux.lock
