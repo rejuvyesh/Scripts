@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+# -*- encoding: utf-8 -*-
+# Copyright rejuvyesh <mail@rejuvyesh.com>, 2014
+# License: GNU GPL 3 <http://www.gnu.org/copyleft/gpl.html>
+
+
+ARGV.each{ |fn|
+  if fn =~ /\.(png|jpg|jpeg)\Z/
+    require 'epitools'
+    infile = Path[fn]
+    outfile = infile.with(basename: "#{infile.basename}-a4")
+    cmd = ['gm convert', infile.to_s ]
+    cmd += %w[-rotate 90 
+          -resize 595x842 
+          -gravity center 
+          -extent 595x842]
+    cmd += [outfile.to_s]
+    puts cmd
+    system *cmd
+}
