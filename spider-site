@@ -1,0 +1,10 @@
+#!/bin/zsh
+
+# Created by rejuvyesh <mail@rejuvesh.com>
+
+nice linkchecker -odot --complete -v --ignore-url=^mailto --no-warnings "@*" \
+  | fgrep http \
+  | fgrep -v -e "label=" -e "->" -e '" [' -e '" ]' -e "/ " \
+  | sed -e "s/href=\"//" -e "s/\",//" -e "s/ //" \
+  | filter-urls \
+  | sort --unique >> ~/.urls.txt
