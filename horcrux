@@ -2,6 +2,8 @@
 
 # Created by rejuvyesh <mail@rejuvyesh.com>
 
+[[ -s ~/.zsh/local.sh ]] && source ~/.zsh/local.sh
+
 HORCRUX_DIRECTORY="$XDG_CONFIG_HOME/horcrux"
 
 if [[ ! -d "$HORCRUX_DIRECTORY" ]]; then
@@ -34,10 +36,8 @@ if [[ -d "$DESTINATION_DRIVE/$BACKUP_BASENAME" ]]; then
 fi
 
 # Set duplicity parameters
-name="$(hostname)-$(date $DATE_FORMAT)"
+name="$(hostname)"
 DUP_PARAMS="-v$VERBOSITY --name $name --allow-source-mismatch --encrypt-key $ENCRYPT_KEY $DUP_PARAMS"
-
-
 
 is_locked() {
     # check for lockfile
