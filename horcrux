@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-# Created by rejuvyesh <rejuvyesh@gmail.com>
+# Created by rejuvyesh <mail@rejuvyesh.com>
 
 HORCRUX_DIRECTORY="$XDG_CONFIG_HOME/horcrux"
 
