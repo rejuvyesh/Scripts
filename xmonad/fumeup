@@ -16,10 +16,10 @@ watch_fume() {
 
     if [[ $mod_time -gt $last_mod_time ]]; then
       last_mod_time=$mod_time
-      echo "$(ti display --start 'today 0:00' -f status | awk 'ORS=" "'| sed -r 's/^.{3}//' | sed -r 's/\^fg\(/\<fc\=/' | sed -r 's/\^fg\(\)/\<\/fc\>/' | sed -r 's/\)/>/' | sed -r 's/(101|T)//')"
+      echo "$(ti display --start 'today 0:00' -f status | awk 'ORS=" "'| sed -r 's/^.{3}//' | sed -r 's/\^fg\(/\<fc\=/' | sed -r 's/\^fg\(\)/\<\/fc\>/' | sed -r 's/\)/>/' | sed -r 's/(101)//;s/T//')"
     elif [[ $now -gt $(( $last_mod_time + 600 )) ]]; then
       last_mod_time=$now
-      echo "$(ti display --start 'today 0:00' -f status  | tr "\\n" " "  | sed -r 's/^.{3}//'| sed -r 's/\^fg\(/\<fc\=/' | sed -r 's/\^fg\(\)/\<\/fc\>/' | sed -r 's/\)/>/' | sed -r 's/(101|T)//')"
+      echo "$(ti display --start 'today 0:00' -f status  | tr "\\n" " "  | sed -r 's/^.{3}//'| sed -r 's/\^fg\(/\<fc\=/' | sed -r 's/\^fg\(\)/\<\/fc\>/' | sed -r 's/\)/>/' | sed -r 's/(101)//;s/T//')"
     fi
 }
 watch_fume
