@@ -1,0 +1,25 @@
+#!/bin/zsh
+
+# Created by rejuvyesh <mail@rejuvesh.com>
+
+# fume
+
+fume_db=$(ruby -ryaml << EOF
+c = YAML.load_file(File.join(ENV['HOME'], '.fumerc'))
+puts File.join(c['fume_dir'], 'fume_db.yaml')
+EOF
+)
+
+watch_fume() {
+    mod_time=$(stat -c "%Y" $fume_db)
+    now=$(date "+%s")
+
+    if [[ $mod_time -gt $last_mod_time ]]; then
+      last_mod_time=$mod_time
+      echo "$(ti display --start 'today 0:00' -f status | awk 'ORS=" "'| sed -r 's/^.{3}//' | sed -r 's/\^fg\(/\<fc\=/' | sed -r 's/\^fg\(\)/\<\/fc\>/' | sed -r 's/\)/>/' | sed -r 's/(101|T)//')"
+    elif [[ $now -gt $(( $last_mod_time + 600 )) ]]; then
+      last_mod_time=$now
+      echo "$(ti display --start 'today 0:00' -f status  | tr "\\n" " "  | sed -r 's/^.{3}//'| sed -r 's/\^fg\(/\<fc\=/' | sed -r 's/\^fg\(\)/\<\/fc\>/' | sed -r 's/\)/>/' | sed -r 's/(101|T)//')"
+    fi
+}
+watch_fume
