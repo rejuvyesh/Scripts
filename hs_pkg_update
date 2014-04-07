@@ -10,7 +10,12 @@ File.load('~/.hs_packages').each do |line|
 
   pkg = line.strip
   if pkg.index(/:path/)
-    ap "Need to install #{pkg}"
+    path = pkg.partition('=>').last
+    package = pkg.partition('=>').first.split(' ').first
+    puts path
+    ap "Installing #{package}"
+    Dir.chdir(eval path)
+    system 'cabal install'
   else
     puts "getting #{pkg}..."
     system "cabal install #{pkg}"
