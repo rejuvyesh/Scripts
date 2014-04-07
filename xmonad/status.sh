@@ -23,7 +23,7 @@ EOF
 )
 
 # icons
-ICON_PATH="/home/rejuvyesh/dev/scripts/xmonad/icons"
+ICON_PATH="/home/rejuvyesh/src/scripts/xmonad/icons"
 ICON_WIRED="^i(${ICON_PATH}/net_wired.xbm)"
 ICON_WIRELESS="^i(${ICON_PATH}/wifi_01.xbm)"
 ICON_AC="^fg(#008060)^i(${ICON_PATH}/ac_01.xbm)^fg()"
@@ -131,7 +131,7 @@ update_volume() {
 		    vol="$(echo $vol | sed -r 's/.*[0-9] \[([0-9]+)%.*/\1/' | gdbar -h 10 -w 30 -fg '#61a0b9' -bg '#565656')^ca()^ca()^ca()"
 
 		    update_bar $1 "$vol_icon" "$vol"
-		    inotifywait -t 30 -qq /dev/snd/controlC0
+		    inotifywait -t 30 -qq /src/snd/controlC0
 	  done
 }
 
