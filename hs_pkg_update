@@ -12,10 +12,14 @@ File.load('~/.hs_packages').each do |line|
   if pkg.index(/:path/)
     path = pkg.partition('=>').last
     package = pkg.partition('=>').first.split(' ').first
-    puts path
     ap "Installing #{package}"
     Dir.chdir(eval path)
     system 'cabal install'
+  elsif pkg.index(/:git/)
+    path = pkg.partition('=>').last
+    package = pkg.partition('=>').first.split(' ').first
+    ap "Installing #{package} from git"
+    system 'cabalg', path
   else
     puts "getting #{pkg}..."
     system "cabal install #{pkg}"
