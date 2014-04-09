@@ -4,9 +4,9 @@
 # License: GNU GPL 3 <http://www.gnu.org/copyleft/gpl.html>
 
 devices = [
-           "bcm5974",
+#           "bcm5974",
            "Synaptics TouchPad",
-           "USB Optical Mouse"
+#           "USB Optical Mouse"
           ]
 
 id = nil
