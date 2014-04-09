@@ -1,25 +1,24 @@
-#!/bin/zsh
+#!/usr/bin/env ruby
+# -*- encoding: utf-8 -*-
+#
+# File: fumeup.rb
+#
+# Copyright rejuvyesh <mail@rejuvyesh.com>, 2014
+# License: GNU GPL 3 <http://www.gnu.org/copyleft/gpl.html>
 
-# Created by rejuvyesh <mail@rejuvesh.com>
+require 'yaml'
 
-# fume
+config = YAML.load_file(File.join(ENV['HOME'], '.fumerc'))
+fume_db = File.join(config['fume_dir'], 'fume_db.yaml')
 
-fume_db=$(ruby -ryaml << EOF
-c = YAML.load_file(File.join(ENV['HOME'], '.fumerc'))
-puts File.join(c['fume_dir'], 'fume_db.yaml')
-EOF
-)
+last_mod_time = 0
+mod_time = File.mtime(fume_db).to_i
+now =  Time.now.to_i
 
-watch_fume() {
-    mod_time=$(stat -c "%Y" $fume_db)
-    now=$(date "+%s")
-
-    if [[ $mod_time -gt $last_mod_time ]]; then
-      last_mod_time=$mod_time
-      ti display --start 'today 0:00' -f status 
-    elif [[ $now -gt $(( $last_mod_time + 600 )) ]]; then
-      last_mod_time=$now
-      ti display --start 'today 0:00' -f status
-    fi
-}
-watch_fume
+if mod_time > last_mod_time
+  last_mod_time = mod_time
+  puts `ti display --start 'today 0:00' -f status`
+elsif now > last_mod_time + 600
+  last_mod_time = now
+  puts `ti display --start 'today 0:00' -f status`
+end
