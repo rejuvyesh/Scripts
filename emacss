@@ -20,7 +20,7 @@ fi
 # use the daemon if it exists, but fall back on a stand-alone emacs, or vim/vi on crappy systems
 if [[ -e $eclient ]]; then
   if [[ -e $emacs ]]; then
-    emacsclient $argclient --alternate-editor="emacs$argemacs" $*
+    emacsclient $argclient --alternate-editor="emacs $argemacs" $*
   else
     if [[ -e $vim ]]; then
       emacsclient $argclient --alternate-editor='vim' $*
