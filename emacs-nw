@@ -1,0 +1,5 @@
+#!/bin/zsh
+
+# Created by rejuvyesh <mail@rejuvesh.com>
+
+emacs -nw "$@"
