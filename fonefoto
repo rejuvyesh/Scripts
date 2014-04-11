@@ -1,9 +1,10 @@
-#!/bin/zsh
+#!/usr/bin/env zsh
 
-# Created by rejuvyesh <rejuvyesh@gmail.com>
+# Created by rejuvyesh <mail@rejuvyesh.com>
 
+mount_dir="/media/android"
 phone_type=android
-program=$0
+program=$(basename $0)
 usage() {
     cat <<EOM
     Usage:
@@ -23,7 +24,7 @@ if [[ "$1" = cleanup ]]; then
     case $phone_type in
         android)
             printf "removing photos"
-            rm -f ~/android/SD\ card/DCIM/*/* || true
+            rm -f ${mount_dir}/SD\ card/DCIM/*/* || true
             sleep 1
             ;;
     esac
@@ -33,7 +34,7 @@ if [[ "$1" = setup ]]; then
     printf "Waiting for phone..."
     case $phone_type in
         android)
-            go-mtpfs ~/android
+            go-mtpfs ${mount_dir}
             echo
             ;;
     esac
@@ -44,7 +45,7 @@ if [[ "$1" = unmount ]]; then
     printf "unmounting phone..."
     case $phone_type in
         android)
-            fusermount -u ~/android
+            fusermount -u ${mount_dir}
             echo done
             ;;
     esac
@@ -58,7 +59,7 @@ if [[ "$1" = mv ]]; then
 
     case "$phone_type" in
         android)
-            cp -v ~/android/SD\ card/DCIM/*/* "./$subdir/"
+            cp -v ${mount_dir}/SD\ card/DCIM/*/* "./$subdir/"
             fonefoto cleanup
             ;;
         *)
