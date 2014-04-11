@@ -5,6 +5,6 @@ then
     echo "$1 already exists"
     exit
 fi
-echo -e "#!/bin/zsh\n\n# Created by rejuvyesh <mail@rejuvesh.com>\n" > "$1"
+echo -e "#!/usr/bin/env zsh\n\n# Created by rejuvyesh <mail@rejuvesh.com>\n" > "$1"
 chmod a+x "$1"
-emacsclient "-nw" "$1"
+emacs-gui "$1"
