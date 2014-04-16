@@ -22,7 +22,7 @@ File.load('~/.hs_packages').each do |line|
     system 'cabalg', path
   else
     puts "getting #{pkg}..."
-    system "cabal install #{pkg}"
+    system "cabal install -j #{pkg}"
   end
 
 end
