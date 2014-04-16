@@ -32,13 +32,13 @@ DATE_FORMAT="+%Y-%m-%d"
 
 if [[ -d "$DESTINATION_DRIVE/$BACKUP_BASENAME" ]]; then
   BUPBACKUP_DIR="$DESTINATION_DRIVE/$BACKUP_BASENAME/home"
-  DUPBACKUP_DIR="$DESTINATION_DRIVE/$BACKUP_BASENAME/duplicity"
+  DUPBACKUP_DIR="file://$DESTINATION_DRIVE/$BACKUP_BASENAME/duplicity"
 fi
 
 # Set duplicity parameters
 name="$(hostname)"
-DUP_PARAMS="-v$VERBOSITY --name $name --allow-source-mismatch --encrypt-key $ENCRYPT_KEY $DUP_PARAMS"
-
+DUP_PARAMS="--name $name --allow-source-mismatch --encrypt-key $ENCRYPT_KEY $DUP_PARAMS"
+echo $DUP_PARAMS
 is_locked() {
     # check for lockfile
     if [[ -f /tmp/horcrux.lock ]]; then
