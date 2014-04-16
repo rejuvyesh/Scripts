@@ -83,7 +83,7 @@ if mountpoint -q $DESTINATION_DRIVE; then # check for mounted drive
     
     # backup pacman cache
     echo "move pacman cache"
-    paccache -m "$MOUNTED_DRIVE/pacman-cache" -k 5 2>&1 | tee -a "$LOG_FILE"
+    paccache -m "$DESTINATION_DRIVE/pacman-cache" -k 5 2>&1 | tee -a "$LOG_FILE"
 fi
 
 # remove lockfile
