@@ -1,0 +1,34 @@
+#!/usr/bin/env zsh
+
+# Copyright rejuvyesh <mail@rejuvyesh.com>, 2014
+# License: GNU GPL 3 <http://www.gnu.org/copyleft/gpl.html>
+
+syncroot="$HOME/books/reading_list"
+
+die(){ echo -e "Error: ${1:-"Unknown error at line $LINENO."}" 1>&2; exit 1; }
+require(){
+  command -v $1 > /dev/null 2>&1 || { suggestion=""; if [ ! -z "$2" ]; then suggestion=" $2"; fi; die "$1 is not installed.$suggestion"; }
+}
+
+require "ebook-convert" "Try installing calibre"
+require "k2pdfopt" "Try installing k2pdfopt"
+
+file="$1"
+
+if [[ $file == *.mobi ]]; then
+   cp "$file" "$syncroot"
+fi
+
+if [[ $file == *.epub  ]]; then
+  base=$(basename $file ".epub")
+  mobi="$syncroot/${base}.azw3"
+  ebook-convert "$file" "$mobi"
+fi
+
+if [[ $file == *.pdf ]]; then
+   if [[ $file == *k2opt.pdf ]]; then
+     mv "$file" "$syncroot"
+   else
+     k2pdfopt -odpi 300 -dev kpw "$file" -o "$syncroot/$file"
+   fi
+fi
