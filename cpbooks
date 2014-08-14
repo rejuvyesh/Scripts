@@ -7,7 +7,7 @@ syncroot="$HOME/books/reading_list"
 
 die(){ echo -e "Error: ${1:-"Unknown error at line $LINENO."}" 1>&2; exit 1; }
 require(){
-  command -v $1 > /dev/null 2>&1 || { suggestion=""; if [ ! -z "$2" ]; then suggestion=" $2"; fi; die "$1 is not installed.$suggestion"; }
+  command -v "$1" > /dev/null 2>&1 || { suggestion=""; if [ ! -z "$2" ]; then suggestion=" $2"; fi; die "$1 is not installed.$suggestion"; }
 }
 
 require "ebook-convert" "Try installing calibre"
@@ -20,7 +20,7 @@ if [[ $file == *.mobi ]]; then
 fi
 
 if [[ $file == *.epub  ]]; then
-  base=$(basename $file ".epub")
+  base=$(basename "$file" ".epub")
   mobi="$syncroot/${base}.azw3"
   ebook-convert "$file" "$mobi"
 fi
