@@ -52,25 +52,25 @@ data = %{ ID_VIDEO_ID=0
 }
 
 def mpv_identify(filename)
-  output = %x(mpv --vo=null --ao=null --frames=0 --identify "#{filename}")
+  output = %x(mpv_identify.sh "#{filename}")
   clip_info  = {}
   video_info = {}
   audio_info = {}
   info       = {}
   output.lines.each do |line|
     
-    if line =~ /ID_([\dA-Z_]+)=(.+)$/
+    if line =~ /([\da-z_]+)=(.+)$/
       name, val = $1, $2
       
       case name
-      when /CLIP_INFO_(NAME|VALUE)(\d)+/
+      when /clip_info_(name|value)(\d)+/
         clip_info[$2] ||= {}
         clip_info[$2][$1.downcase] = val
-      when 'EXIT', 'DEMUXER', 'CLIP_INFO_N', 'FILENAME', 'SEEKABLE'
+      when 'exit', 'demuxer', 'clip_info_n', 'filename', 'seekable'
         # skip it
-      when /VIDEO_(.+)/
+      when /video_(.+)/
         video_info[$1.downcase] = val
-      when /AUDIO_(.+)/
+      when /audio_(.+)/
         audio_info[$1.downcase] = val
       else
         info[name.downcase] = val
