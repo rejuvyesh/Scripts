@@ -1,0 +1,4 @@
+#!/usr/bin/env zsh
+
+EXEPATH="$HOME/.wine/utorrent.exe"
+WINEPREFIX=~/.wine/wine32ie6 WINEARCH=win32 wine "$EXEPATH" /noinstall "$*" > /dev/null 2>&1 &
