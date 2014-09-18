@@ -1,3 +1,8 @@
 spark/
 *.bak
 cron/kitab
+proxy
+go/*
+!go/
+*.go
+cron/jeb
