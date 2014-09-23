@@ -118,7 +118,7 @@ cat /dev/stdin \
        -e edandmore.com -e egg168.com/ -e electronicsmanufacturer-china -e elegantsuccubu \
        -e elsevier.com/ -e encrypted.google.com -e encyclopediadramatica -e endlessvid -e ens888 \
        -e epson.com/ -e erogedownload.com/ -e erotic -e eroxia -e evernote -e error.fc2.com -e explosm \
-       -e extabit.com -e f1fan -e facebook.com/ -e fakku.net -e fark.com -e fark.com/ -e fark.net \
+       -e extabit.com -e f1fan -e facebook.com -e fakku.net -e fark.com -e fark.com/ -e fark.net \
        -e fastclick -e faves.com/ -e favicon.ico -e faysale -e fb.me -e fbcdn.net -e feedburner.com/ \
        -e feeddemon.com -e feedmelinks.com -e feeds.falkvinge.net/ -e feeds.nytimes.co \
        -e scholar.google.com -e feeds.nytimes.com/ -e feeds.penny-arcade.com -e feeds.penny-arcade.com \
@@ -149,7 +149,7 @@ cat /dev/stdin \
        -e hustlercash -e i68.cc -e iagals.com/ -e icanhascheezburger.com/ -e icwutudidare -e idolsgarden \
        -e idv.tw -e ifile -e igarette -e igg.me -e iherb -e iichan -e iiichan.net -e ikosubs \
        -e image.google.com -e image.kz -e imagebam -e imagehut.com -e imagehyper.com/ -e imagemagic \
-       -e imagevenue -e imdb.com/ -e img.free.fr -e bandcamp.com/download -e imgur.com/download \
+       -e imagevenue -e inoreader.com -e imdb.com/ -e img.free.fr -e bandcamp.com/download -e imgur.com/download \
        -e artaddiction.net -e imouto -e in199 -e indiegogo.com/ -e information.devry.edu -e ing199.net \
        -e ingdirect -e ingentaconnect.com -e investopedia.com/ -e iqcomp -e iq-test.com -e iqdb.org \
        -e irssi -e isfelicity -e isohunt -e itunes -e ivorytower.com -e jamendo -e javjunkies -e jetdl \
@@ -229,7 +229,7 @@ cat /dev/stdin \
        -e temp-share.com -e test.personality-project.org -e texify.com -e texify.com/ -e thebiz8.com/ \
        -e thecounter.com/ -e thenude -e thomas.loc.gov -e timeanddate -e tineye -e tinypic -e tinyur \
        -e tjoos -e tk-nation.com/ -e topatoco -e torrent -e torrentz -e touhou.wiki -e touhouwiki \
-       -e tracfone.com/ -e truenutrition.com -e tube8 -e tumblr.com/ -e turnstyle.com -e tvtrope \
+       -e tracfone.com/ -e trakt.tv -e truenutrition.com -e tube8 -e tumblr.com/ -e turnstyle.com -e tvtrope \
        -e tvtropes -e tweetmeme.com/ -e twimg.com/ -e twistys.com/ -e twitchfilm -e twitpic \
        -e twitter.com/ -e twmail.net -e ubuntuforums -e ul.to/ -e underarmour.com/ -e unicyclist.com \
        -e unitedpharm -e uploaded.to -e uploadmirrors.com/ -e uploadstation -e ups.com/ \
