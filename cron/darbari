@@ -21,7 +21,7 @@ zathura_open() {
 };
 
 zathura_files() {
-    property "Zathura" "_ZATHURA_FILEPATH"
+    property ".zathura-wrapped" "_ZATHURA_FILEPATH"
 };
 
 zathura_open && (zathura_files > ~/.local/share/zathura/state)
