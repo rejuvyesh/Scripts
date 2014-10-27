@@ -5,7 +5,8 @@ def File.same_file?(a,b)
 end
 
 def File.namenorm(fn)
-  nfn = fn.tr("A-Z '()", "a-z_").squeeze("_")
+  nfn = fn.tr("A-Z '()", 'a-z_').squeeze('_')
+  nfn[0] = '' if nfn[0] == '_'
   return if fn == nfn
   if !File.exist?(nfn) or File.same_file?(fn,nfn)
     File.rename(fn, nfn)
