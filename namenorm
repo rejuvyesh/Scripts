@@ -5,7 +5,7 @@ def File.same_file?(a,b)
 end
 
 def File.namenorm(fn)
-  nfn = fn.tr("A-Z '()", "a-z_")
+  nfn = fn.tr("A-Z '()", "a-z_").squeeze("_")
   return if fn == nfn
   if !File.exist?(nfn) or File.same_file?(fn,nfn)
     File.rename(fn, nfn)
@@ -15,5 +15,5 @@ def File.namenorm(fn)
 end
 
 files = ARGV
-files = files[1..-1].map{|p| Dir[p]}.flatten if files[0] == '-x'
-files.each{|fn| File.namenorm(fn)}
+files = files[1..-1].map { |p| Dir[p] }.flatten if files[0] == '-x'
+files.each { |fn| File.namenorm(fn) }
