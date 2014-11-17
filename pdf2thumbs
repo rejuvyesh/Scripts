@@ -1,0 +1,73 @@
+#!/usr/bin/env ruby
+# -*- encoding: utf-8 -*-
+# Copyright rejuvyesh <mail@rejuvyesh.com>, 2014
+# License: GNU GPL 3 <http://www.gnu.org/copyleft/gpl.html>
+
+# Needs pdftk installed
+
+require 'epitools'
+
+
+def command?(name)
+  `which #{name}`
+  $?.success?
+end
+
+def get_pdf_page_num(infile)
+
+  unless command?("pdftk")
+    STDERR.puts "pdtk not found"
+    exit
+  end
+
+  pdfinfo = `pdftk #{infile} "dump_data"`
+  if not pdfinfo or pdfinfo == ""
+    STDERR.puts "Didn't get info from pdftk #{infile} dump_data"
+    return
+  end
+
+  begin
+    pdfinfo =~ /NumberOfPages: (\d+)/
+    pagenum = $1.to_i
+  rescue
+    STDERR.puts "Didn't get page count for #{infile} from pdftk"
+    exit
+  end
+
+  pagenum
+end
+
+def thumbify(infile)
+
+  infile = Path[infile]
+
+  unless infile.exists?
+    STDERR.puts "Couldn't find #{infile}"
+    return
+  end
+
+  outfile = infile.with(:ext => 'jpg')
+
+  if outfile.exists?
+    puts "Error: #{outfile} exists!"
+    return
+  end
+
+  endpage = get_pdf_page_num(infile) - 1
+
+  puts
+  puts "Input: #{infile}"
+  puts "Output: #{outfile}"
+  puts
+  
+  cmd = "montage #{infile.to_s}[0-#{endpage}] -mode Concatenate -tile x1 -quality 80 -resize x230 -trim #{outfile.to_s}"
+  system(cmd)
+  
+end
+
+if ARGV.empty?
+  puts 'Usage: pdf2thumbs [pdf files]'
+  puts 'Generate thumbnails from pdf'
+end
+
+ARGV.each { |f| thumbify f }
