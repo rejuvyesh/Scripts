@@ -1,0 +1,123 @@
+#!/usr/bin/env ruby
+# -*- encoding: utf-8 -*-
+# Copyright rejuvyesh <mail@rejuvyesh.com>, 2014
+# License: GNU GPL 3 <http://www.gnu.org/copyleft/gpl.html>
+
+# Download books from libgen :)
+# Thanks to @epitron for `tz` and `epitools`
+
+require 'nokogiri'
+require 'open-uri'
+require 'epitools/colored'
+
+### Settings ####################################################
+CLIENT = 'curl'
+
+################################################################
+# TODO:
+# * Handle muliple pages maybe?
+################################################################
+
+class Result
+  attr_accessor :title, :author, :hash, :publisher, :year, :size, :extension
+
+  def initialize(dl)
+    link = dl.at_xpath('td[10]/a') rescue nil
+
+    fail if link.nil?
+
+    if link['href'] =~ /([0-9a-fA-F]{32})/
+      @hash = $1
+    end
+
+    @author    = dl.at_xpath('td[2]').text.strip
+    @title     = dl.at_xpath('td[3]').text.strip
+    @publisher = dl.at_xpath('td[4]').text.strip
+    @year      = dl.at_xpath('td[5]').text.strip
+    @size      = dl.at_xpath('td[8]').text.strip
+    @extension = dl.at_xpath('td[9]').text.strip
+  end
+
+  def libgen_downurl
+    "http://libgen.org/get.php?md5=#{hash}"
+  end
+
+  def file_name
+    "#{author.downcase.tr(' ', '_')}-#{title.downcase.tr(' ', '_')}-#{year}.#{extension}"
+  end
+  
+end
+
+################################################################
+
+def truncate_title(s, max=80, elided = ' ...')
+  s.match(/(.{1,#{max}})(?:\s|\z)/)[1].tap do |res|
+    res << elided unless res.length == s.length
+  end
+end
+
+def search(query)
+  url = "http://libgen.org/search.php?&req=#{URI.escape(query)}&view=simple&column=def&sort=title&sortmode=ASC&page=1"
+
+  page = Nokogiri::HTML(open url)
+  rows = page.xpath('//table[3]/tr')
+  rows.shift  # Remove header
+  rows.search('tr').map {|tr| Result.new(tr)}.compact
+end
+
+def choose_book(results)
+  print '>> Books to download (eg. 1 3 5-7): '
+
+  begin
+    input = $stdin.gets
+  rescue Interrupt
+    puts
+    puts 'Nevermind'
+    exit 1
+  end
+
+  unless input
+    puts
+    puts 'Fine, be that way!'
+    exit 1
+  end
+
+  choices = []
+
+  input.split.each do |choice|
+    choice.strip!
+    case choice
+    when /^(\d+)$/
+      choices << $1.to_i
+    when /^(\d+)-(\d+)$/
+      start  = $1.to_i
+      finish = $2.to_i
+      choices += (start..finish).to_a
+    else
+      puts "Invalid choice: #{choice}"
+    end
+  end
+
+  choices.map { |n| results[n-1] }
+end
+
+def display(results)
+  results.each_with_index do |r, n|
+    line = "<13>#{n+1}."
+    line += " <14>#{truncate_title(r.title)}"
+    line += " <12>#{r.author} <8>| <13>#{r.year} <8>| <11>#{r.size} <8>| <10>#{r.extension}"
+
+    puts line.colorize
+  end
+end
+
+if __FILE__ == $PROGRAM_NAME
+  query = ARGV.join(" ")
+  results = search(query)
+  display(results)
+
+  chosen = choose_book(results)
+  chosen.each do |t|
+    system(CLIENT, t.libgen_downurl, '-o', t.file_name)
+  end
+end
