@@ -22,7 +22,7 @@ fi
 if [[ $file == *.epub  ]]; then
   base=$(basename "$file" ".epub")
   mobi="$syncroot/${base}.azw3"
-  ebook-convert "$file" "$mobi --enable-heuristics"
+  ebook-convert "$file" "$mobi"
 fi
 
 if [[ $file == *.pdf ]]; then
