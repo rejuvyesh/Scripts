@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+# -*- encoding: utf-8 -*-
+# Copyright rejuvyesh <mail@rejuvyesh.com>, 2015
+# License: GNU GPL 3 <http://www.gnu.org/copyleft/gpl.html>
+
+PAPERS_DIR = '/home/rejuvyesh/papers'
+
+if __FILE__ == $PROGRAM_NAME
+  Dir.chdir PAPERS_DIR
+  if ARGV.any?
+    ARGV.each do |u|
+      puts "## URL: #{u}"
+      cmd = "wget #{u} -O tmp.pdf"
+      system(*cmd)
+      new = `paper-rename tmp.pdf`
+      puts "## Adding to git-annex"
+      system("git-annex addurl --file #{new.strip} #{u.strip}")
+    end
+  end
+end
