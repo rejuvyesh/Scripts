@@ -6,8 +6,8 @@
 PAPERS_DIR = '/home/rejuvyesh/papers'
 
 if __FILE__ == $PROGRAM_NAME
-  Dir.chdir PAPERS_DIR
   if ARGV.any?
+    Dir.chdir PAPERS_DIR
     ARGV.each do |u|
       puts "## URL: #{u}"
       cmd = "wget #{u} -O tmp.pdf"
@@ -16,5 +16,12 @@ if __FILE__ == $PROGRAM_NAME
       puts "## Adding to git-annex"
       system("git-annex addurl --file #{new.strip} #{u.strip}")
     end
+  else
+    puts
+    puts 'Usage: paper <url1> [<url2>, ...]'
+    puts
+    puts 'Purpose:'
+    puts '  Download pdf, rename it to human friendly name and'
+    puts '  add to git-annex with the url.'
   end
 end
