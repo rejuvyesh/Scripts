@@ -708,11 +708,19 @@ def toHtml(top):
   return s
 
 if __name__ == '__main__':
-  if len(sys.argv) <= 1:
-    printf("Error: no pdf file")
+  if len(sys.argv) <= 2:
+    print("Error: no pdf file")
+
+    print("Usage:   pdf2wordcloud [-t|-h] <pdf>")
+    print("  -t            text mode (comma separated)")
+    print("  -h            html mode (inside a span)")
     exit(-1)
   else:
-    pdffile = sys.argv[1]
+    if sys.argv[1] == '-t':
+      txtmode = True
+    elif sys.argv[1] == '-h':
+      txtmode = False
+    pdffile = sys.argv[2]
 
   cmd = "pdftotext %s %s" % (pdffile, "/tmp/out.txt")
   print("Running " + cmd)
@@ -733,4 +741,7 @@ if __name__ == '__main__':
   # Get top N
   top = sorted(wcount.items(), key=itemgetter(1), reverse=True)[:N]
 
-  print(toHtml(top))
+  if txtmode:
+    print(toTxt(top))
+  else:
+    print(toHtml(top))
