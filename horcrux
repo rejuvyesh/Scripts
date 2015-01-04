@@ -18,11 +18,8 @@ else
   printf "File created. Populate it with your own details.\n"
   cat > "$HORCRUX_DIRECTORY/horcrux.conf" <<EOF
 DESTINATION_DRIVE="/media/disk/"
-ENCRYPT_KEY=ABCD1234     # Public key ID to encrypt backups with
-VERBOSITY=5              # Logs all the file changes (see duplicity man page)
 BACKUP_BASENAME='backup' # Directory name for local backups (i.e., destination
                          # /Volumes/my_drive/backup/ or /media/my_drive/backup/)
-DUP_PARAMS=''            # Parameters to pass to Duplicity
 EOF
   exit 1
 fi
@@ -32,13 +29,8 @@ DATE_FORMAT="+%Y-%m-%d"
 
 if [[ -d "$DESTINATION_DRIVE/$BACKUP_BASENAME" ]]; then
   BUPBACKUP_DIR="$DESTINATION_DRIVE/$BACKUP_BASENAME/home"
-  DUPBACKUP_DIR="file://$DESTINATION_DRIVE/$BACKUP_BASENAME/duplicity"
 fi
 
-# Set duplicity parameters
-name="$(hostname)"
-DUP_PARAMS="--name $name --allow-source-mismatch --encrypt-key $ENCRYPT_KEY $DUP_PARAMS"
-echo $DUP_PARAMS
 is_locked() {
     # check for lockfile
     if [[ -f /tmp/horcrux.lock ]]; then
@@ -74,13 +66,6 @@ if mountpoint -q $DESTINATION_DRIVE; then # check for mounted drive
     cd $BUPBACKUP_DIR/
     ionice -c3 bup -d . fsck -g -vv 2>&1 | tee -a "$LOG_FILE"
 
-    # duplicity backup
-    echo "backing up via duplicity"
-    ionice -c3 duplicity incremental --exclude-globbing-filelist \
-      $DUP_IGNORE $DUP_PARAMS "$DUP_SOURCE" \
-      "DUPBACKUP_DIR" \
-      2>&1 | tee -a "$LOG_FILE"
-    
     # backup pacman cache
     echo "move pacman cache"
     paccache -m "$DESTINATION_DRIVE/pacman-cache" -k 5 2>&1 | tee -a "$LOG_FILE"
