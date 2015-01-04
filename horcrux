@@ -20,6 +20,7 @@ else
 DESTINATION_DRIVE="/media/disk/"
 BACKUP_BASENAME='backup' # Directory name for local backups (i.e., destination
                          # /Volumes/my_drive/backup/ or /media/my_drive/backup/)
+S3_BUCKET="s3://backup.bup"
 EOF
   exit 1
 fi
@@ -69,6 +70,10 @@ if mountpoint -q $DESTINATION_DRIVE; then # check for mounted drive
     # backup pacman cache
     echo "move pacman cache"
     paccache -m "$DESTINATION_DRIVE/pacman-cache" -k 1 2>&1 | tee -a "$LOG_FILE"
+
+    # amazon backup
+    echo "backing up to s3"
+    aws s3 sync --delete $BUPBACKUP_DIR/ $S3_BUCKET
 fi
 
 # remove lockfile
