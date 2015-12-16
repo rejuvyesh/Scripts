@@ -1,0 +1,62 @@
+#!/usr/bin/env ruby
+
+require 'epitools'
+require 'erb'
+
+def create_review(name, loc=Path['~/src/www/wiki/wikidata/Papers'])
+  pdf_url = make_url(name)
+
+  review = %(* Summary
+
+* Strength
+
+* Weakness
+
+* Notes
+
+** Questions
+
+** Open Problems
+
+** Results
+
+** New Techniques
+
+** Connections
+
+[[#{pdf_url}][Paper]]
+)
+  review_file = Path[loc / name.split('/').last].with(ext: 'org')
+  unless review_file.exists?
+    File.write(review_file, review)
+  end
+  system('xdg-open', pdf_url)
+  pid = Process.spawn('emacs-gui', review_file)
+  Process.detach pid
+  sleep(20.minutes)
+  system("notify-send 'Time Over' 'Start next one' --icon=/usr/share/icons/Faenza/apps/scalable/xfce4-clock.svg -t 12000")
+end
+
+def make_url(name, hostname='http://0.0.0.0:9555/viewer/web/viewer.html?file=%2F')
+  url = hostname + ERB::Util.url_encode(name)
+  url
+end
+
+def help!
+  puts
+  puts 'Usage:'
+  puts '  review <pdf> => open a pdf and a emacs review page'
+  puts 
+  exit 1
+end
+
+if __FILE__ == $PROGRAM_NAME
+  args = ARGV
+  help! if args.empty?
+  
+  pdf = Path[args.first]
+  name = pdf.dirs.drop(3)
+  name << '/'
+  name << pdf.filename
+  create_review(name.join)
+end
