@@ -4,6 +4,9 @@ case $1 in
   "tog")
     dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.PlayPause
     ;;
+  "pause")
+    dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Pause
+    ;;
   "next")
     dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Next
     ;;
@@ -11,7 +14,7 @@ case $1 in
     dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Previous
     ;;
   *)
-    printf "Usage: $(basename $0) tog|next|prev \n"
+    printf "Usage: $(basename $0) tog|pause|next|prev \n"
     exit 1
     ;;
 esac
