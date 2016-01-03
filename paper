@@ -3,6 +3,7 @@
 # Copyright rejuvyesh <mail@rejuvyesh.com>, 2015
 # License: GNU GPL 3 <http://www.gnu.org/copyleft/gpl.html>
 
+require 'shellwords'
 PAPERS_DIR = '/home/rejuvyesh/papers'
 
 if __FILE__ == $PROGRAM_NAME
@@ -14,7 +15,7 @@ if __FILE__ == $PROGRAM_NAME
       system(*cmd)
       new = `paper-rename tmp.pdf`
       puts "## Adding to git-annex"
-      system("git-annex addurl --file #{new.strip} #{u.strip}")
+      system("git-annex addurl --file #{Shellwords.escape(new.strip)} #{u.strip}")
     end
   else
     puts
