@@ -34,7 +34,12 @@ def create_review(name, loc=Path['~/src/www/wiki/wikidata/Papers'])
   pid = Process.spawn('emacs-gui', review_file)
   Process.detach pid
   sleep(20.minutes)
+  notify
+end
+
+def notify
   system("notify-send 'Time Over' 'Start next one' --icon=/usr/share/icons/Faenza/apps/scalable/xfce4-clock.svg -t 12000")
+  system("mpv --really-quiet --volume=100 ~/.wakeup")
 end
 
 def make_url(name, hostname='http://0.0.0.0:9555/viewer/web/viewer.html?file=%2F')
