@@ -50,7 +50,7 @@ end
 def help!
   puts
   puts 'Usage:'
-  puts '  review <pdf> => open a pdf and a emacs review page'
+  puts '  review <pdf> [review] => open a pdf and a emacs review page'
   puts 
   exit 1
 end
@@ -59,9 +59,15 @@ if __FILE__ == $PROGRAM_NAME
   args = ARGV
   help! if args.empty?
   
-  pdf = Path[args.first]
+  pdf = Path[args.shift]
   name = pdf.dirs.drop(3)
   name << '/'
   name << pdf.filename
-  create_review(name.join)
+  
+  review_loc = Path[args.shift]
+  if not review_loc.nil?
+    create_review(name.join, review_loc)
+  else
+    create_review(name.join)
+  end
 end
