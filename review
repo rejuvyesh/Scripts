@@ -2,10 +2,12 @@
 
 require 'epitools'
 require 'erb'
+require 'uri'
 
-def create_review(name, loc=Path['~/src/www/wiki/wikidata/Papers'])
-  pdf_url = make_url(name)
+DEFAULT_PDF_HOST='http://0.0.0.0:9555/viewer/web/viewer.html?file=%2F'
+NOTIFY_ICON='/usr/share/icons/Faenza/apps/scalable/xfce4-clock.svg'
 
+def create_review(pdf_url, review_file)
   review = %(* Summary
 
 * Strength
@@ -26,7 +28,7 @@ def create_review(name, loc=Path['~/src/www/wiki/wikidata/Papers'])
 
 [[#{pdf_url}][Paper]]
 )
-  review_file = Path[loc / name.split('/').last].with(ext: 'org')
+
   unless review_file.exists?
     File.write(review_file, review)
   end
@@ -41,11 +43,12 @@ def create_review(name, loc=Path['~/src/www/wiki/wikidata/Papers'])
 end
 
 def notify
-  system("notify-send 'Time Over' 'Start next one' --icon=/usr/share/icons/Faenza/apps/scalable/xfce4-clock.svg -t 12000")
+  message = 'Time Over Start next one'
+  system("notify-send #{message} --icon=#{NOTIFY_ICON} -t 12000")
   system("mpv --really-quiet --volume=100 ~/.wakeup")
 end
 
-def make_url(name, hostname='http://0.0.0.0:9555/viewer/web/viewer.html?file=%2F')
+def make_url(name, hostname = DEFAULT_PDF_HOST)
   url = hostname + ERB::Util.url_encode(name)
   url
 end
@@ -53,24 +56,33 @@ end
 def help!
   puts
   puts 'Usage:'
-  puts '  review <pdf> [review] => open a pdf and a emacs review page'
-  puts 
+  puts '  review <pdf> [review filename] => open a pdf and a emacs review page'
+  puts
   exit 1
 end
 
 if __FILE__ == $PROGRAM_NAME
   args = ARGV
   help! if args.empty?
-  
-  pdf = Path[args.shift]
-  name = pdf.dirs.drop(3)
-  name << '/'
-  name << pdf.filename
-  
-  review_loc = Path[args.shift]
-  if not review_loc.nil?
-    create_review(name.join, review_loc)
+  # Actual logic, ugly
+  pdf_loc = args.shift
+  review_file = Path[args.shift]
+  review_loc = Path['~/src/www/wiki/wikidata/Papers']
+  if pdf_loc =~ URI::regexp
+    pdf_url = pdf_loc
+    if review_file.nil?
+      puts 'Please enter the review filename'
+      puts "It will be put in #{review_loc}"
+      print '> '
+      name = $stdin.gets.chomp
+    end
   else
-    create_review(name.join)
+    pdf = Path[pdf_loc]
+    name = pdf.dirs.drop(3)
+    name << '/'
+    name << pdf.filename
+    pdf_url = make_url(name.join)
   end
+  review_file = Path[review_loc / name.split('/').last].with(ext: 'org')
+  create_review(pdf_url, review_file)
 end
