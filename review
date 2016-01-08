@@ -33,7 +33,10 @@ def create_review(name, loc=Path['~/src/www/wiki/wikidata/Papers'])
   system('xdg-open', pdf_url)
   pid = Process.spawn('emacs-gui', review_file)
   Process.detach pid
-  sleep(20.minutes)
+  (1..20).each do |mins|
+    print "\r#{mins} minutes"
+    sleep(60.seconds)
+  end
   notify
 end
 
