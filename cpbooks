@@ -29,6 +29,6 @@ if [[ $file == *.pdf ]]; then
    if [[ $file == *k2opt.pdf ]]; then
      mv "$file" "$syncroot"
    else
-     k2pdfopt -odpi 300 -dev kpw "$file" -o "$syncroot/$file"
+     k2pdfopt -odpi 300 -dev kp2 "$file" -o "$syncroot/$file"
    fi
 fi
