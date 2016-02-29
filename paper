@@ -13,7 +13,7 @@ if __FILE__ == $PROGRAM_NAME
       puts "## URL: #{u}"
       cmd = "wget #{u} -O tmp.pdf"
       system(*cmd)
-      new = `paper-rename tmp.pdf`
+      new = `paper-rename -f tmp.pdf`
       puts "## Adding to git-annex"
       system("git-annex addurl --file #{Shellwords.escape(new.strip)} #{u.strip}")
     end
