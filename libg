@@ -11,7 +11,7 @@ require 'open-uri'
 require 'epitools/colored'
 
 ### Settings ####################################################
-CLIENT = 'curl'
+CLIENT = 'wget'
 
 ################################################################
 # TODO:
@@ -39,11 +39,11 @@ class Result
   end
 
   def libgen_downurl
-    "http://libgen.org/get.php?md5=#{hash}"
+    "http://libgen.io/get.php?md5=#{hash}"
   end
 
   def file_name
-    "#{author.downcase.tr(' ', '_')}-#{title.downcase.tr(' ', '_')}-#{year}.#{extension}"
+    "#{author.downcase.tr(",?()';:", '').tr(' ', '_')}-#{title.downcase.tr(",?()';:", '').tr(' ', '_')}-#{year}.#{extension}"
   end
   
 end
@@ -57,7 +57,7 @@ def truncate_title(s, max=80, elided = ' ...')
 end
 
 def search(query)
-  url = "http://libgen.org/search.php?&req=#{URI.escape(query)}&view=simple&column=def&sort=title&sortmode=ASC&page=1"
+  url = "http://gen.lib.rus.ec/search.php?&req=#{URI.escape(query)}&view=simple&column=def&sort=title&sortmode=ASC&page=1"
 
   page = Nokogiri::HTML(open url)
   rows = page.xpath('//table[3]/tr')
@@ -103,7 +103,7 @@ end
 
 def display(results)
   results.each_with_index do |r, n|
-    line = "<13>#{n+1}."
+    line  = "<13>#{n+1}."
     line += " <14>#{truncate_title(r.title)}"
     line += " <12>#{r.author} <8>| <13>#{r.year} <8>| <11>#{r.size} <8>| <10>#{r.extension}"
 
@@ -118,6 +118,6 @@ if __FILE__ == $PROGRAM_NAME
 
   chosen = choose_book(results)
   chosen.each do |t|
-    system(CLIENT, t.libgen_downurl, '-o', t.file_name)
+    system(CLIENT, t.libgen_downurl, '-O', t.file_name)
   end
 end
