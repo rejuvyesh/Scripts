@@ -1,0 +1,5 @@
+#!/usr/bin/env zsh
+# Copyright rejuvyesh <mail@rejuvyesh.com>, 2016
+# License: GNU GPLv3 (or later) <http://www.gnu.org/copyleft/gpl.html>
+
+emacsclient -c --eval "(mu4e~compose-browse-url-mail \"$@\")"
