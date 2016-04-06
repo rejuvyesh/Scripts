@@ -1,0 +1,35 @@
+#!/usr/bin/env ruby
+# -*- encoding: utf-8 -*-
+# Copyright rejuvyesh <mail@rejuvyesh.com>, 2016
+# License: GNU GPL 3 <http://www.gnu.org/copyleft/gpl.html>
+
+def help!
+  puts
+  puts 'Usage:'
+  puts '  music-ctl <command> => Control whichever media player that is playing'
+  puts
+  exit 1
+end
+
+def spotify_running?
+  if `ps aux | grep 'spotif[y]'` == ''
+    false
+  else
+    true
+  end
+end
+
+if __FILE__ == $PROGRAM_NAME
+  args = ARGV
+  help! if args.empty?
+  command = args.first
+  mpd_song = `mpc current`
+  mpd_status = `mpc status | tail -2 | head -1 | cut -d' ' -f1 | tr -d '[]'`.strip
+  if spotify_running?
+    system("mpc pause")
+    cmd = "spotify-ctl #{command}"
+  elsif mpd_song != '' && ['playing','paused'].include?(mpd_status)
+    cmd = "mpc #{command}"
+  end
+  system(cmd)
+end
