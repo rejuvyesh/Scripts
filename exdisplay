@@ -1,0 +1,26 @@
+#!/usr/bin/env zsh
+# Copyright rejuvyesh <mail@rejuvyesh.com>, 2016
+# License: GNU GPLv3 (or later) <http://www.gnu.org/copyleft/gpl.html>
+
+connect() {
+  if [[ $(hostname) == 'kusanagi' ]]; then
+      xrandr --output HDMI2 --scale 2x2 --mode 1920x1080 --fb 2880x1620 --right-of eDP1
+      xrandr --output eDP1 --scale 1x1
+  fi
+}
+
+disconnect() {
+  if [[ $(hostname) == 'kusanagi' ]]; then
+     xrandr --output HDMI2 --off
+  fi
+}
+
+case "$1" in
+  connect)
+    connect
+    ;;
+  disconnect)
+    disconnect
+    ;;
+  *)
+esac
