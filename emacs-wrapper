@@ -18,10 +18,10 @@ else
   argemacs="-nw"
 fi
 
-# use the daemon if it exists, but fall back on a stand-alone emacs, or vim/vi on crappy systems
+# use the daemon if it exists, start it otherwise, or vim/vi on crappy systems
 if [[ -e $eclient ]]; then
   if [[ -e $emacs ]]; then
-    emacsclient $argclient --alternate-editor="emacs-24.3 $argemacs" $*
+    emacsclient $argclient --alternate-editor="" $*
   else
     if [[ -e $vim ]]; then
       emacsclient $argclient --alternate-editor='vim' $*
