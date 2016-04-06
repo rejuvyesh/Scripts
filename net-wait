@@ -2,7 +2,6 @@
 
 loaded?() {
     grep -qE 'wlan|eth|ath|wlp' /proc/net/route
-    pgrep firewall
 }
 
 while ! loaded?; do
