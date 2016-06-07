@@ -23,4 +23,5 @@ case "$1" in
     disconnect
     ;;
   *)
+    echo "connect or disconnect?"
 esac
