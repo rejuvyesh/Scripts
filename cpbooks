@@ -3,7 +3,9 @@
 # Copyright rejuvyesh <mail@rejuvyesh.com>, 2014
 # License: GNU GPL 3 <http://www.gnu.org/copyleft/gpl.html>
 
-syncroot="$HOME/books/reading_list"
+syncroot="$2"
+syncroot="${syncroot:-$HOME/books/reading_list}"
+
 
 die(){ echo -e "Error: ${1:-"Unknown error at line $LINENO."}" 1>&2; exit 1; }
 require(){
