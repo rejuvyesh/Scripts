@@ -1,22 +1,33 @@
 #!/usr/bin/env ruby
 
-# Thanks to @epitron, moidified a little
-
-require 'nokogiri'
-require 'open-uri'
-require 'epitools/colored'
-
-### Settings ##############################################
-
-CLIENT      = "utorrent"
-MAX_RESULTS = 20
-
 ###########################################################
 # TODO:
 # * Fix Term::Table API
 ###########################################################
 
+gem 'slop', "~> 3.6"
+require 'slop'
+require 'nokogiri'
+require 'epitools'
+
+###########################################################
+
+ROOT_URL = "https://torrentz2.eu/"
+
 TRACKERS = %w[
+  http://opentrackr.org/announce
+  http://tracker.opentrackr.org:1337/announce
+  udp://tracker.coppersurfer.tk:6969/announce
+  http://109.121.134.121:1337/announce
+  http://p4p.arenabg.ch:1337/announce
+  udp://tracker.leechers-paradise.org:6969/announce
+  udp://zer0day.ch:1337/announce
+  http://tracker.opentrackr.org:1337/announce
+  http://www.opentrackr.org/announce
+  udp://opentrackr.org:1337/announce
+  http://5.79.83.193:2710/announce
+  udp://mgtracker.org:6969/announce
+  udp://tracker.mg64.net:6969/announce
   http://tracker.best-torrents.net:6969/announce
   http://tracker.ccc.de:80/
   udp://tracker.ccc.de:80/
@@ -32,13 +43,34 @@ TRACKERS = %w[
   udp://tracker.prq.to/announce
   udp://tracker.publicbt.com:80/
   http://tracker.publicbt.com:80/
-  udp://11.rarbg.com/announce
-  http://9.rarbg.com:2710/announce
   http://bt1.the9.com:6969/announce
   http://tracker.torrent.to:2710/announce
   http://tracker.xpear.de:6969/announce
-  http://tracker.yify-torrents.com/announce
 ]
+
+###########################################################
+
+module Settings
+  extend self
+
+  def rc
+    path = Path["~/.tzrc"]
+    path.exists? ? path.read_json : {}
+  end
+
+  def client
+    rc["client"] || 'deluge'
+  end
+
+  def page_size
+    rc["page_size"] || 20
+  end
+
+  def order 
+    rc["order"]&.to_sym
+  end
+end
+
 
 ###########################################################
 
@@ -48,7 +80,15 @@ class Result
   def initialize(dl)
     link = dl.at("dt a")
 
-    raise if link.nil?
+    if link.nil?
+      if dt = dl.at("dt")
+        @title = dt.text
+        @verified, @age, @size, @seeds, @peers, @date = [""] * 6
+        return
+      else
+        raise "Bad dl:\n#{dl}"
+      end
+    end
 
     @title = link.text
 
@@ -58,35 +98,122 @@ class Result
 
     dd = dl.at("dd")
 
-    @votes = dd.at(".v").text.strip
-    @age   = dd.at(".a").text
-    @date  = DateTime.parse dd.at(".a span")["title"]
-    @size  = dd.at(".s").text
-    @seeds = dd.at(".u").text
-    @peers = dd.at(".d").text
+    # @votes = dd.at(".v").text.strip
+    # @age   = dd.at(".a").text
+    # @size  = dd.at(".s").text
+    # @seeds = dd.at(".u").text
+    # @peers = dd.at(".d").text
+
+    #["<span>✓</span>", "<span title=\"1444063087\">10 months</span>", "<span>2288 MB</span>", "<span>857</span>", "<span>162</span>"]
+    @verified, @age, @size, @seeds, @peers = dd.search("span").map(&:text)
+    @date = Time.at dd.at("span[title]")["title"].to_i
   end
 
   def datestamp
     @date.strftime("%Y-%m-%d")
   end
 
+  def age
+    @age.gsub(/ (day|month|week|hour|year|min)s?/) do |m|
+      ($1 == "month") ? "mo" : m[1]
+    end
+  end
+
   def magnet_url
     tracker_params = TRACKERS.map { |tr| "&tr=#{URI.escape(tr)}" }.join("")
     "magnet:?xt=urn:btih:#{hash}&dn=#{title}#{tracker_params}"
   end
+
+  def self.md5_to_magnet_url(md5)
+    tracker_params = TRACKERS.map { |tr| "&tr=#{URI.escape(tr)}" }.join("")
+    "magnet:?xt=urn:btih:#{md5}#{tracker_params}"
+  end
+
 end
 
 ###########################################################
 
-def search(query)
-  url = "http://torrentz.eu/search"
-  url += "?f=#{URI.escape(query)}" unless query.empty? 
+def read_url(url)
+  begin
+    cmd = [
+      "curl",
+      "-A", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.81 Safari/537.36",
+      "--silent",
+      "-e", ROOT_URL,
+      url
+    ]
+    IO.popen(cmd, "r") { |io| io.read }
+  rescue Errno::ENOENT
+    require 'open-uri'
+    open(url).read
+  end
+end
 
-  page = Nokogiri::HTML(open url)
+def search(query, page_size, page=nil, order=nil)
+
+  case order
+  when :peers, nil
+    action = 'search'
+  when :date
+    action = 'searchA'
+  when :rating
+    action = 'searchN'
+  else
+    raise 'Unknown ordering'
+  end
+
+  url = "#{ROOT_URL}#{action}"
+
+  opts = {}
+  opts["f"] = URI.escape(query) unless query.empty?
+  opts["p"] = page || 0
+
+  url += "?" + opts.map { |k,v| "#{k}=#{v}" }.join("&")
+
+  page = Nokogiri::HTML(read_url(url))
+
   page.search(".results dl").
-       take(MAX_RESULTS).
-       map { |dl| Result.new(dl) rescue nil }.
+       take(page_size).
+       map { |dl| Result.new(dl) }.
        compact
+end
+
+def cleanup(title)
+  title.gsub(/[\^\*\"]/, '').strip
+end
+
+def download_torrent(result)
+  puts "<3>* <11>#{result.title} <8>(<10>#{result.seeds}/<2>#{result.peers}<8>)".colorize
+
+  filename = "#{result.hash} - #{cleanup result.title}.torrent"
+  if File.exists? filename
+    puts "  |_ skipping".light_yellow
+    return
+  end
+
+  url = "http://torcache.net/torrent/#{result.hash}.torrent"
+  open(url) do |t|
+    data = t.read
+    open(filename, "wb") { |o| o.write(data) }
+
+    puts "  |_ wrote #{data.size} bytes"
+  end
+rescue OpenURI::HTTPError => e
+  puts "  |_ error: #{e}".light_red
+end
+
+def mirror(query, pages=10)
+  (0..pages).each do |page|
+    results = search(query, page)
+
+    break if results.empty?
+
+    puts "* Got #{results.size} results..."
+
+    results.each do |result|
+      download_torrent(result)
+    end
+  end
 end
  
 def choose_torrents(results)
@@ -128,12 +255,11 @@ end
 
 def display(results)
   results.each_with_index do |r, n|
-    line = "<13>#{n+1}."
+    number = "<13>#{(n+1).to_s.rjust(3)}. "
     # line += " <8>[<12>+#{r.votes}<8>]" unless r.votes.empty?
     # line += " <14>#{r.size} <7>(#{r.age})"
-    line += " <14>#{r.title}"
+    line = "<10>#{r.seeds.rjust(7)} <8>| <13>#{r.peers.rjust(7)} <8>| <12>#{r.size.rjust(8)} <8>| <11>#{r.age.rjust(4)} <8>| #{number} <8>| <14>#{r.title}"
     # line += " <7>#{r.date} <10>#{r.seeds} <13>#{r.peers}"
-    line += " <12>#{r.size} <8>| <11>#{r.age} <8>| <10>#{r.seeds} <8>| <13>#{r.peers}"
 
     puts line.colorize
   end
@@ -141,16 +267,68 @@ end
 
 ###########################################################
 
+def parse_options
+  opts = Slop.parse(help: true, strict: true) do
+    banner "Usage: tz [options] <query>"
+
+    on 'd',  'date',   'Sort by date'
+    on 'r',  'rating', 'Sort by rating'
+    on 'm',  'mirror', 'Retrieve all torrents'
+    on 'n=', 'num',    'Number of results (default: #{Settings.page_size})'
+    on 'a=', 'add',    'Add MD5 hash'
+  end
+
+  [opts, ARGV]
+end
+
+###########################################################
+
+def open_url(url)
+  # Make sure the torrent client exists
+  unless Path.which(Settings.client)
+    $stdout.puts "Error: Couldn't locate #{Settings.client} in the path"
+    exit 1
+  end
+
+  # Fork into the background before running the client
+  Process.daemon(true)
+  exec(Settings.client, url)
+end
+
 if __FILE__ == $0
-  query = ARGV.join(" ")
+  opts, args = parse_options
 
-  results = search(query)
+  query = args.join(" ")
 
-  display(results)
+  if query =~ %r{https?://torrentz2.eu/(\w{40})}
+    md5 = $1
+  else
+    md5 = opts[:add]
+  end
 
-  chosen = choose_torrents(results)
+  if md5
+    url = Result.md5_to_magnet_url(md5)
+    open_url(url)
+  elsif opts.mirror?
+    mirror(query)
+  else
+    order = 
+    if opts.date? 
+      order = :date
+    elsif opts.rating?
+      order = :rating
+    else
+      order = Settings.order
+    end
 
-  chosen.each do |t|
-    system(CLIENT, t.magnet_url)
+    page_size = opts[:num]&.to_i || Settings.page_size
+    results   = search(query, page_size, nil, order)
+
+    display(results)
+
+    chosen = choose_torrents(results)
+    chosen.each do |t|
+      open_url(t.magnet_url)
+    end
   end
 end
