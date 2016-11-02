@@ -4,8 +4,7 @@
 
 connect() {
   if [[ $(hostname) == 'kusanagi' ]]; then
-      xrandr --output HDMI2 --scale 2x2 --mode 1920x1080 --fb 2880x1620 --right-of eDP1
-      xrandr --output eDP1 --scale 1x1
+      xrandr --output eDP1 --auto --output HDMI2 --auto --panning 3840x2160+2880+0 --scale 2x2 --right-of eDP1
   fi
 }
 
