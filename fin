@@ -11,10 +11,10 @@ expr="$1"
 shift
 
 if [[ "$#" == "0" ]]; then
-  find . -xdev | ag "$expr"
+  find . -xdev | rg "$expr"
 else
   while (( "$#" )); do
-    find "$1" -xdev | ag "$expr"
+    find "$1" -xdev | rg "$expr"
     shift
   done
 fi
