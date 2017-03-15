@@ -15,34 +15,36 @@ require 'epitools'
 ROOT_URL = "https://torrentz2.eu/"
 
 TRACKERS = %w[
-  http://opentrackr.org/announce
-  http://tracker.opentrackr.org:1337/announce
   udp://tracker.coppersurfer.tk:6969/announce
-  http://109.121.134.121:1337/announce
+  udp://tracker.openbittorrent.com:80/
+  http://tracker.openbittorrent.com:80/
+  udp://tracker.publicbt.com:80/
+  http://tracker.publicbt.com:80/
+  http://tracker.opentrackr.org:1337/announce
+  udp://p4p.arenabg.ch:1337/announce
+  http://tracker.ccc.de:80/
+  udp://tracker.ccc.de:80/
+  udp://glotorrents.pw:6969/announce
+  udp://fr33dom.h33t.com:3310/announce
+  http://tracker.ilibr.org:6969/announce
+  udp://9.rarbg.com:2710/announce
+  udp://9.rarbg.to:2710/announce
+  udp://9.rarbg.me:2710/announce
+  udp://tracker.istole.it:6969/
+  udp://tracker.prq.to/announce
+  udp://tracker.glotorrents.com:6969/announce
+  http://inferno.demonoid.com:3407/announce
   http://p4p.arenabg.ch:1337/announce
+  udp://p4p.arenabg.ch:1337
+  udp://torrent.gresille.org:80/announce
   udp://tracker.leechers-paradise.org:6969/announce
   udp://zer0day.ch:1337/announce
-  http://tracker.opentrackr.org:1337/announce
-  http://www.opentrackr.org/announce
-  udp://opentrackr.org:1337/announce
-  http://5.79.83.193:2710/announce
   udp://mgtracker.org:6969/announce
   udp://tracker.mg64.net:6969/announce
   http://tracker.best-torrents.net:6969/announce
-  http://tracker.ccc.de:80/
-  udp://tracker.ccc.de:80/
   udp://open.demonii.com:1337/announce
-  http://inferno.demonoid.com:3407/announce
   http://exodus.desync.com:6969/announce
   http://www.eddie4.nl:6969/announce
-  udp://fr33dom.h33t.com:3310/announce
-  http://tracker.ilibr.org:6969/announce
-  udp://tracker.istole.it:6969/
-  udp://tracker.openbittorrent.com:80/
-  http://tracker.openbittorrent.com:80/
-  udp://tracker.prq.to/announce
-  udp://tracker.publicbt.com:80/
-  http://tracker.publicbt.com:80/
   http://bt1.the9.com:6969/announce
   http://tracker.torrent.to:2710/announce
   http://tracker.xpear.de:6969/announce
@@ -63,10 +65,10 @@ module Settings
   end
 
   def page_size
-    rc["page_size"] || 20
+    rc["page_size"]
   end
 
-  def order 
+  def order
     rc["order"]&.to_sym
   end
 end
@@ -78,6 +80,11 @@ class Result
   attr_accessor :title, :hash, :votes, :age, :date, :size, :seeds, :peers # :tags
 
   def initialize(dl)
+    if dl.is_a? String
+      @hash = dl
+      return
+    end
+
     link = dl.at("dt a")
 
     if link.nil?
@@ -119,14 +126,12 @@ class Result
     end
   end
 
-  def magnet_url
-    tracker_params = TRACKERS.map { |tr| "&tr=#{URI.escape(tr)}" }.join("")
-    "magnet:?xt=urn:btih:#{hash}&dn=#{title}#{tracker_params}"
+  def tracker_params
+    TRACKERS.map { |tr| "&tr=#{URI.escape(tr)}" }.join("")
   end
 
-  def self.md5_to_magnet_url(md5)
-    tracker_params = TRACKERS.map { |tr| "&tr=#{URI.escape(tr)}" }.join("")
-    "magnet:?xt=urn:btih:#{md5}#{tracker_params}"
+  def magnet_url
+    "magnet:?xt=urn:btih:#{hash}#{tracker_params}#{"&dn=#{title}" if title}"
   end
 
 end
@@ -149,7 +154,7 @@ def read_url(url)
   end
 end
 
-def search(query, page_size, page=nil, order=nil)
+def search(query, page_size=nil, page=nil, order=nil)
 
   case order
   when :peers, nil
@@ -172,10 +177,9 @@ def search(query, page_size, page=nil, order=nil)
 
   page = Nokogiri::HTML(read_url(url))
 
-  page.search(".results dl").
-       take(page_size).
-       map { |dl| Result.new(dl) }.
-       compact
+  dls = page.search(".results dl")
+  dls = dls.take(page_size) if page_size
+  dls.map { |dl| Result.new(dl) }.compact
 end
 
 def cleanup(title)
@@ -204,7 +208,7 @@ end
 
 def mirror(query, pages=10)
   (0..pages).each do |page|
-    results = search(query, page)
+    results = search(query, nil, page)
 
     break if results.empty?
 
@@ -215,7 +219,7 @@ def mirror(query, pages=10)
     end
   end
 end
- 
+
 def choose_torrents(results)
   print ">> Torrents to download (eg. 1 3 5-7): "
 
@@ -254,11 +258,14 @@ def choose_torrents(results)
 end
 
 def display(results)
-  results.each_with_index do |r, n|
-    number = "<13>#{(n+1).to_s.rjust(3)}. "
+  results.each_with_index.to_a.reverse_each do |r, n|
+    number = "<15>#{(n+1).to_s.rjust(3)}."
+    # seedpeers = "<10>#{r.seeds}<7>/<2>#{r.peers}"
+    seedpeers = "#{r.seeds}/#{r.peers}"
     # line += " <8>[<12>+#{r.votes}<8>]" unless r.votes.empty?
     # line += " <14>#{r.size} <7>(#{r.age})"
-    line = "<10>#{r.seeds.rjust(7)} <8>| <13>#{r.peers.rjust(7)} <8>| <12>#{r.size.rjust(8)} <8>| <11>#{r.age.rjust(4)} <8>| #{number} <8>| <14>#{r.title}"
+    # line = "<10>#{r.seeds.rjust(7)} <8>| <13>#{r.peers.rjust(7)} <8>| <12>#{r.size.rjust(8)} <8>| <11>#{r.age.rjust(4)} <8>| #{number} <8>| <14>#{r.title}"
+    line = "<11>#{r.age.rjust(4)} <8>| <12>#{r.size.rjust(8)} <8>| <10>#{seedpeers.rjust(8)} <8>| #{number} <14>#{r.title}"
     # line += " <7>#{r.date} <10>#{r.seeds} <13>#{r.peers}"
 
     puts line.colorize
@@ -271,11 +278,12 @@ def parse_options
   opts = Slop.parse(help: true, strict: true) do
     banner "Usage: tz [options] <query>"
 
-    on 'd',  'date',   'Sort by date'
-    on 'r',  'rating', 'Sort by rating'
-    on 'm',  'mirror', 'Retrieve all torrents'
-    on 'n=', 'num',    'Number of results (default: #{Settings.page_size})'
-    on 'a=', 'add',    'Add MD5 hash'
+    on 'd',  'date',    'Sort by date'
+    on 'r',  'rating',  'Sort by rating'
+    on 'm',  'mirror',  'Retrieve all torrents'
+    on 'n=', 'num',     'Number of results (default: #{Settings.page_size})'
+    on 'a=', 'add',     'Add MD5 hash'
+    on 'v',  'verbose', 'Show details and stuff'
   end
 
   [opts, ARGV]
@@ -283,37 +291,52 @@ end
 
 ###########################################################
 
-def open_url(url)
+def open_url(url, verbose=false)
+  puts "open url"
   # Make sure the torrent client exists
-  unless Path.which(Settings.client)
+  cmd = Settings.client.split
+
+  unless Path.which(cmd.first)
     $stdout.puts "Error: Couldn't locate #{Settings.client} in the path"
     exit 1
   end
 
+  puts url if verbose
+  puts
   # Fork into the background before running the client
-  Process.daemon(true)
-  exec(Settings.client, url)
+  fork { exec(*cmd, url) }
+  # system(*cmd, url)
 end
+
+###########################################################
 
 if __FILE__ == $0
   opts, args = parse_options
 
   query = args.join(" ")
 
-  if query =~ %r{https?://torrentz2.eu/(\w{40})}
-    md5 = $1
-  else
-    md5 = opts[:add]
-  end
+  md5s = args.map do |arg|
+    case arg.strip
+    when %r{^https?://torrentz2\.eu/(\w{40})}, %r{^https?://idope\.se/torrent/[^/]+/(\w{40})/?}, %r{^https?://torrentproject\.se/(\w{40})/}
+      $1
+    else
+      nil
+    end
+  end.compact + [opts[:add]]
 
-  if md5
-    url = Result.md5_to_magnet_url(md5)
-    open_url(url)
+  md5s.compact!
+
+  if md5s.any?
+    Process.daemon(true)
+    md5s.each do |md5|
+      puts "#{md5}"
+      url = Result.new(md5).magnet_url
+      open_url(url)
+    end
   elsif opts.mirror?
     mirror(query)
   else
-    order = 
-    if opts.date? 
+    if opts.date?
       order = :date
     elsif opts.rating?
       order = :rating
@@ -328,7 +351,7 @@ if __FILE__ == $0
 
     chosen = choose_torrents(results)
     chosen.each do |t|
-      open_url(t.magnet_url)
+      open_url(t.magnet_url, opts.verbose?)
     end
   end
 end
