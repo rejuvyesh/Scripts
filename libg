@@ -39,8 +39,13 @@ class Result
   end
 
   def libgen_downurl
-    "http://libgen.io/get.php?md5=#{hash}"
+    tmpurl = "http://libgen.io/ads.php?md5=#{hash}"
+    page = Nokogiri::HTML(read_url(tmpurl))
+    key = page.css('//a[@href*="key"]').map{ |link| link['href'].match(/key=(.+)/)[1]}[0]
+    finalurl = "#{tmpurl}&key=#{key}"
+    finalurl
   end
+  
 
   def file_name
     "#{author.downcase.tr(",?()';:", '').tr(' ', '_')}-#{title.downcase.tr(",?()';:", '').tr(' ', '_')}-#{year}.#{extension}"
@@ -127,6 +132,7 @@ def display(results)
     puts line.colorize
   end
 end
+
 
 if __FILE__ == $PROGRAM_NAME
   query = ARGV.join(" ")
