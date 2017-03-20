@@ -12,7 +12,7 @@ require 'epitools/colored'
 
 ### Settings ####################################################
 CLIENT = 'wget'
-
+ROOT_URL = 'http://gen.lib.rus.ec/search.php'
 ################################################################
 # TODO:
 # * Handle muliple pages maybe?
@@ -50,6 +50,23 @@ end
 
 ################################################################
 
+def read_url(url)
+  begin
+    cmd = [
+      "curl",
+      "-A", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.81 Safari/537.36",
+      "--silent",
+      "-e", ROOT_URL,
+      url
+    ]
+    IO.popen(cmd, "r") { |io| io.read }
+  rescue Errno::ENOENT
+    require 'open-uri'
+    open(url).read
+  end
+end
+
+
 def truncate_title(s, max=80, elided = ' ...')
   s.match(/(.{1,#{max}})(?:\s|\z)/)[1].tap do |res|
     res << elided unless res.length == s.length
@@ -57,9 +74,9 @@ def truncate_title(s, max=80, elided = ' ...')
 end
 
 def search(query)
-  url = "http://gen.lib.rus.ec/search.php?&req=#{URI.escape(query)}&view=simple&column=def&sort=title&sortmode=ASC&page=1"
+  url = "#{ROOT_URL}?&req=#{URI.escape(query)}&view=simple&column=def&sort=title&sortmode=ASC&page=1"
 
-  page = Nokogiri::HTML(open url)
+  page = Nokogiri::HTML(read_url(url))
   rows = page.xpath('//table[3]/tr')
   rows.shift  # Remove header
   rows.search('tr').map {|tr| Result.new(tr)}.compact
@@ -118,6 +135,7 @@ if __FILE__ == $PROGRAM_NAME
 
   chosen = choose_book(results)
   chosen.each do |t|
-    system(CLIENT, t.libgen_downurl, '-O', t.file_name)
+    puts t.libgen_downurl
+    #system(CLIENT, t.libgen_downurl, '-O', t.file_name)
   end
 end
