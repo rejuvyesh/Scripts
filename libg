@@ -42,7 +42,7 @@ class Result
     tmpurl = "http://libgen.io/ads.php?md5=#{hash}"
     page = Nokogiri::HTML(read_url(tmpurl))
     key = page.css('//a[@href*="key"]').map{ |link| link['href'].match(/key=(.+)/)[1]}[0]
-    finalurl = "#{tmpurl}&key=#{key}"
+    finalurl = "http://libgen.io/get.php?md5=#{hash}&key=#{key}"
     finalurl
   end
   
@@ -141,7 +141,7 @@ if __FILE__ == $PROGRAM_NAME
 
   chosen = choose_book(results)
   chosen.each do |t|
-    puts t.libgen_downurl
-    #system(CLIENT, t.libgen_downurl, '-O', t.file_name)
+    puts "<3>Downloading #{t.libgen_downurl}".colorize
+    system(CLIENT, t.libgen_downurl)
   end
 end
