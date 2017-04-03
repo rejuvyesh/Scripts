@@ -119,11 +119,12 @@ def choose_book(results)
 end
 
 def display(results)
-  results.each_with_index do |r, n|
-    line  = "<13>#{n+1}."
-    line += " <14>#{truncate_title(r.title)}"
-    line += " <12>#{r.author} <8>| <13>#{r.year} <8>| <11>#{r.size} <8>| <10>#{r.extension}"
+  results.each_with_index.to_a.reverse_each do |r, n|
 
+    line = " <13>#{r.year.rjust(4)} <8>| <11>#{r.size.rjust(6)} <8>| <10>#{r.extension.rjust(4)} "
+    line += "<8>| <15>#{(n+1).to_s.rjust(3)}. "
+    line += "<14>#{truncate_title(r.title)}, "
+    line += "<12>#{r.author}"
     puts line.colorize
   end
 end
