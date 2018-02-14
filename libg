@@ -9,6 +9,7 @@
 require 'nokogiri'
 require 'open-uri'
 require 'epitools/colored'
+require 'net/http'
 
 ### Settings ####################################################
 CLIENT = 'wget'
@@ -45,12 +46,6 @@ class Result
     finalurl = "http://libgen.io/get.php?md5=#{hash}&key=#{key}"
     finalurl
   end
-  
-
-  def file_name
-    "#{author.downcase.tr(",?()';:", '').tr(' ', '_')}-#{title.downcase.tr(",?()';:", '').tr(' ', '_')}-#{year}.#{extension}"
-  end
-  
 end
 
 ################################################################
@@ -124,11 +119,12 @@ def choose_book(results)
 end
 
 def display(results)
-  results.each_with_index do |r, n|
-    line  = "<13>#{n+1}."
-    line += " <14>#{truncate_title(r.title)}"
-    line += " <12>#{r.author} <8>| <13>#{r.year} <8>| <11>#{r.size} <8>| <10>#{r.extension}"
+  results.each_with_index.to_a.reverse_each do |r, n|
 
+    line = " <13>#{r.year.rjust(4)} <8>| <11>#{r.size.rjust(6)} <8>| <10>#{r.extension.rjust(4)} "
+    line += "<8>| <15>#{(n+1).to_s.rjust(3)}. "
+    line += "<14>#{truncate_title(r.title)}, "
+    line += "<12>#{r.author}"
     puts line.colorize
   end
 end
@@ -142,6 +138,8 @@ if __FILE__ == $PROGRAM_NAME
   chosen = choose_book(results)
   chosen.each do |t|
     puts "<3>Downloading #{t.libgen_downurl}".colorize
-    system(CLIENT, t.libgen_downurl)
+    redirect = Net::HTTP.get_response(URI(t.libgen_downurl))['location']
+    out = URI.unescape(redirect.split('/').last)
+    system(CLIENT, t.libgen_downurl, '-O', out)
   end
 end
