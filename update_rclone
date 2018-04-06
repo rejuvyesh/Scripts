@@ -1,0 +1,25 @@
+#!/bin/bash
+
+check_running() {
+  SERVICE="$1"
+  status=$(ps -a | sed -n /${SERVICE}/p)
+  if [ "${RESULT:-null}" = null ]; then
+      echo "rclone not running. Can safely proceed!"
+  else
+    exit 1
+  fi
+}
+
+install_rclone() {
+  cd /tmp
+  curl -O "https://beta.rclone.org/rclone-beta-latest-linux-amd64.zip"
+  unzip "rclone-beta-latest-linux-amd64.zip"
+  cd rclone-*-linux-amd64
+  cp rclone $HOME/local/bin/
+  cp rclone.1 $HOME/local/share/man/man1/
+  rclone --version
+}
+
+check_running "rclone"
+
+install_rclone
