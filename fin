@@ -13,7 +13,7 @@ shift
 if [[ "$#" == "0" ]]; then
   find . -xdev | rg "$expr"
 else
-  while (( "$#" )); do
+  while (( $# )); do
     find "$1" -xdev | rg "$expr"
     shift
   done
